@@ -1,0 +1,2135 @@
+<html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Welcome to eProcurement - Tender Management System - Govt
+	of ....</title>
+<script src="/resources/js/jquery.js"></script>
+<link href="/resources/css/style_new.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="/resources/scripts/NumberinWords.js"></script>
+<script type="text/javascript" src="/resources/js/tempshape.js"></script>
+<script language="JavaScript">
+	var i = '2';
+
+	if (i == 0) {
+		document.getElementById("preBidHideArea").style.display = "none";
+	} else if (i == 1) {
+		document.getElementById("preBidHideArea").style.display = "block";
+		document.getElementById("PreBidClosingdate").style.display = "block";
+
+	} else {
+		document.getElementById("preBidHideArea").style.display = "block";
+		document.getElementById("PreBidClosingdate").style.display = "none";
+	}
+</script>
+
+<script language="JavaScript">
+	var i = "22";
+	var displaycirid = "false";
+
+	if (i > 0) {
+		$("#RequiredTenderDocumentsHidden").show();
+	}
+
+	else {
+		$("#RequiredTenderDocumentsHidden").hide();
+	}
+</script>
+<script type="text/javascript">
+	window.onload = function() {
+		focusPopup();
+	}
+
+	function fnwindowclose() {
+
+		window.opener.closeWindow();
+
+	}
+
+	function fnBack(prePge) {
+		temp(tempName, 'viewTenderBean');
+		document.viewTenderBean.action = prePge;
+		document.viewTenderBean.method = "POST";
+		document.viewTenderBean.submit();
+	}
+
+	function fnViewCorrigendums() {
+		temp(tempName, 'viewTenderBean');
+		document.viewTenderBean.action = " CorrigendumDetails.html";
+		document.viewTenderBean.method = "POST";
+		document.viewTenderBean.submit();
+
+	}
+	function fnviewBoqItemDetails(proId, indentId, prePage) {
+		document.viewTenderBean.hdnProcurementID.value = proId;
+		document.viewTenderBean.hdnIndentID.value = indentId;
+		document.viewTenderBean.hdnPreviousPage.value = prePage;
+		temp(tempName, 'viewTenderBean');
+		document.viewTenderBean.action = "BoqItems.html";
+		document.viewTenderBean.method = "POST";
+		document.viewTenderBean.submit();
+	}
+	function fnlocationDetails(proId, indentId, prePage) {
+		document.viewTenderBean.hdnProcurementID.value = proId;
+		document.viewTenderBean.hdnIndentID.value = indentId;
+		document.viewTenderBean.hdnPreviousPage.value = prePage;
+		temp(tempName, 'viewTenderBean');
+		document.viewTenderBean.action = "LocationDetails.html";
+		document.viewTenderBean.method = "POST";
+		document.viewTenderBean.submit();
+
+	}
+	function fnviewTenderDocuments(proId, indentId, prePage) {
+		document.viewTenderBean.hdnProcurementID.value = proId;
+		document.viewTenderBean.hdnIndentID.value = indentId;
+		document.viewTenderBean.hdnPreviousPage.value = prePage;
+		temp(tempName, 'viewTenderBean');
+		document.viewTenderBean.action = "ViewTenderDocuments.html";
+		document.viewTenderBean.method = "POST";
+		document.viewTenderBean.submit();
+	}
+
+	function fnviewItemDetails(proId, indentId, prePage) {
+		document.viewTenderBean.hdnProcurementID.value = proId;
+		document.viewTenderBean.hdnIndentID.value = indentId;
+		document.viewTenderBean.hdnPreviousPage.value = prePage;
+		temp(tempName, 'viewTenderBean');
+		document.viewTenderBean.action = "ViewItemDetailspage.html";
+		document.viewTenderBean.method = "POST";
+		document.viewTenderBean.submit();
+	}
+	var popupWindow = null;
+	function viewstageforms(pid, actionurl, stageID, formID, nTenderFormID,
+			hdnFormName) {
+		if (!window.focus)
+			return false;
+		document.viewTenderBean.popUPRequestParameter.value = "popUPRequestParameter";
+		document.viewTenderBean.action = actionurl;
+		document.viewTenderBean.hdnFormID.value = formID;
+		document.viewTenderBean.nTenderFormID.value = nTenderFormID;
+		document.viewTenderBean.hdnProcurementID.value = pid;
+		document.viewTenderBean.hdnStageID.value = stageID;
+		document.viewTenderBean.hdnFormName.value = hdnFormName;
+		popupWindow = window
+				.open(
+						'',
+						'mysecondwindow',
+						'width=1300,height=600,toolbar=no, location=no,directories=no,statusbar=no,menubar=no,scrollbars=yes,copyhistory=no, resizable=no');
+		document.viewTenderBean.target = 'mysecondwindow';
+		document.viewTenderBean.submit();
+		document.viewTenderBean.target = '';
+		popupWindow.focus();
+		window.onmousedown = focusPopup();
+		window.onkeyup = focusPopup();
+		window.onmousemove = focusPopup();
+		if (actionurl != "viewepctemplates.html") {
+			// 		freezeParentPage();
+		}
+		return false;
+	}
+
+	function focusPopup() {
+
+		if (popupWindow != null && !popupWindow.closed) {
+
+			popupWindow.focus();
+			return false;
+		} else {
+			popupWindow = null;
+
+		}
+	}
+
+	function viewSchedulesStageforms(nScheduleID, sScheduleName) {
+		document.viewTenderBean.hdnScheduleID.value = nScheduleID;
+		document.viewTenderBean.hdnScheduleName.value = sScheduleName;
+		document.viewTenderBean.hdnPreviousPge.value = 'TenderDetailsHome.html';
+		temp(tempName, 'viewTenderBean');
+		document.viewTenderBean.action = "viewSchedulesStageforms.html";
+		document.viewTenderBean.method = "POST";
+		document.viewTenderBean.submit();
+	}
+
+	function freezeParentPage() {
+		var divRef = document.getElementById('SecondModalBackgroundDiv');
+
+		if (divRef != null) {
+			divRef.style.display = 'block';
+
+			if (document.body.clientHeight > document.body.scrollHeight) {
+				divRef.style.height = document.body.clientHeight + 'px';
+			} else {
+				divRef.style.height = document.body.scrollHeight + 'px';
+			}
+
+			divRef.style.width = '100%';
+		}
+	}
+
+	function closeWindow() {
+		if ((popupWindow != null) && (popupWindow.closed == false)) {
+			popupWindow.close();
+
+			var divRef = document.getElementById('SecondModalBackgroundDiv');
+			divRef.style.display = 'none';
+		}
+
+		popupWindow = null;
+	}
+
+	window.onunload = function() {
+		closeWindow();
+	}
+	window.onfocus = function() {
+		if ((popupWindow != null) && (popupWindow.closed == false)) {
+			popupWindow.focus();
+		}
+	}
+</script>
+<script type="text/javascript">
+	$(document).ready(function() {
+		if ($("#lblEcvValue").val() == 0) {
+			//alert($("#lblEcvValue").val());			
+			$("#amuntWords").hide();
+		}
+
+		toWords($("#lblEcvValue").val(), 'txtAmountinWords', 'INR', 'Paisa');
+		$("#btnShowSimple").click(function(e) {
+			ShowDialog(false);
+			e.preventDefault();
+		});
+
+		$("#btnShowModal").click(function(e) {
+			ShowDialog(true);
+			e.preventDefault();
+		});
+
+		$("#btnClose").click(function(e) {
+			HideDialog();
+			e.preventDefault();
+		});
+
+	});
+
+	function ShowDialog(modal) {
+
+		$("#overlay").show();
+		$("#dialog").fadeIn(300);
+		$("#dialog").css(
+				{
+					top : '50%',
+					left : '50%',
+					margin : '-' + ($('#dialog').height() / 2) + 'px 0 0 -'
+							+ ($('#dialog').width() / 2) + 'px'
+				});
+
+		if (modal) {
+			$("#overlay").unbind("click");
+		} else {
+			$("#overlay").click(function(e) {
+				HideDialog();
+			});
+		}
+	}
+
+	function HideDialog() {
+		$("#overlay").hide();
+		$("#dialog").fadeOut(300);
+	}
+</script>
+<script>
+	//Added by Sireesha.T on 12 Jun 2017 for Dynamic File Path and File Name for Training 
+	//Manual Kits in Supplier View Tender Form.
+	function downloadKit(file) {
+		document.viewTenderBean.action = "downloadTenderTrainingKitManual.html";
+		document.viewTenderBean.method = "POST";
+		document.viewTenderBean.submit();
+	}
+</script>
+
+<script type="text/javascript">
+	function toggle_visibility(id) {
+		var e = document.getElementById(id);
+		if (e.style.display == 'block')
+			e.style.display = 'none';
+		else
+			e.style.display = 'block';
+	}
+</script>
+
+<style type="text/css">
+.tender-links-container {
+	width: 98%;
+	margin: 0 auto;
+}
+
+.tender-links {
+	padding: 10px 0;
+	line-height: 26px;
+}
+
+.tender-links a {
+	color: #0c447e;
+	font-weight: 500;
+	text-decoration: none;
+	margin-right: 10px;
+}
+
+.tender-links a:hover {
+	text-decoration: underline;
+}
+</style>
+
+<style>
+.panelDiv {
+	border-radius: 12px;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+	margin: 10px auto;
+	width: 98%;
+}
+
+.panelDiv summary {
+	padding: 10px 16px;
+	cursor: pointer;
+	color: #fff;
+	font-size: 14px;
+	font-weight: 500;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	list-style: none;
+	background: #001139;
+	-webkit-border-top-right-radius: 12px;
+	-webkit-border-top-left-radius: 12px;
+	-moz-border-radius-topright: 12px;
+	-moz-border-radius-topleft: 12px;
+	border-top-right-radius: 12px;
+	border-top-left-radius: 12px;
+	display: flex;
+}
+
+.panelDiv summary::-webkit-details-marker {
+	display: none;
+}
+
+.panelDiv summary::after {
+	content: "\279C";
+	font-size: 14px;
+	transition: 0.3s;
+	transform: rotate(90deg);
+}
+
+.panelDiv[open] summary::after {
+	transform: rotate(-90deg);
+}
+
+.panelDiv-body {
+	padding: 10px 0px;
+	background: #fff;
+	border-radius: 10px;
+}
+</style>
+
+<style type="text/css">
+.card {
+	border-radius: 12px;
+    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+    margin: 10px auto;
+    width: 98%;
+    border: 1px solid #e9e9e9;
+}
+
+.card-heading {
+	display: flex;
+    justify-content: space-between;
+    align-items: center;
+    list-style: none;
+    border-top-right-radius: 8px;
+    border-top-left-radius: 8px;
+    padding: 10px 15px;
+    font-size: 13px;
+    font-weight: 500;
+    background: #c5d5ff96;
+    color: #001139;
+}
+
+.card-body {
+	padding: 10px 5px;
+    background: #fff;
+    border-radius: 10px;
+    overflow: auto;
+}
+
+.enqDiv {
+	display: flex;
+	width: 99%;
+	margin: 0 auto;
+}
+
+.enqLeft {
+	display: flex;
+	width: 65%;
+}
+
+.enqRight {
+	display: flex;
+	width: 35%;
+}
+
+.navBtnDiv {
+	display: flex;
+}
+
+.navBtn {
+	display: flex;
+	justify-content: center;
+	align-content: center;
+	align-items: center;
+	flex-direction: column;
+	border-radius: 10px;
+	width: 100px;
+	padding: 10px 0px; margin : 5px; gap : 5px;
+	font-size: 11px;
+	font-weight: 500;
+	margin: 5px;
+	gap: 5px;
+}
+
+.navBtn:hover {
+	cursor: pointer;
+	opacity: 0.8;
+}
+
+.navBtn img {
+	
+}
+</style>
+
+</head>
+<body onclick="javascript:focusPopup()" onfocus="javascript:focusPopup()" onpageshow="if (event.persisted) noBack();">
+	
+		
+
+		
+			
+
+
+
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Welcome To Tender Management Services</title>
+<link rel="stylesheet" href="./resources/css/style_new.css">
+<link href="/resources/js/jquery.js" rel="stylesheet" type="text/css">
+<script src="./resources/js/jquery.js"></script>
+<link rel="stylesheet" href="./resources/css/theme.blue.css">
+<script src="./resources/js/jquery.tablesorter.js"></script>
+<link rel="stylesheet" href="./resources/css/jquery.tablesorter.pager.css">
+<script src="./resources/js/jquery.tablesorter.pager.js"></script>
+
+<script id="js">$(function(){
+	debugger;
+	var pagerOptions = {		
+		container: $(".pager"),
+		size: 10
+
+	};
+	$("#pagetable")		
+		.tablesorter({
+			theme: 'blue',
+			widthFixed: true,
+			widgets: ['zebra']
+		})
+		.tablesorterPager(pagerOptions);
+
+});</script>
+<script type="text/javascript">
+
+	$(document).ready(function() {		
+		$(".GridBG tbody tr:even").addClass("GridEvenRow");
+		$(".GridBG tbody tr:odd").addClass("GridOddRow");
+		$(".DescBG td:even").addClass("GridEvenRow");
+		$(".DescBG td:odd").addClass("GridOddRow");
+		$(".TenderHeadeBG tr:even").addClass("GridEvenRow");
+		$(".TenderHeadeBG tr:odd").addClass("GridOddRow");			
+	});
+	function getIndianCurrencyFormat(amount) {
+	    if (amount == null || amount === "") {
+	        return "0";
+	    }
+	    let stringBuilder = [];
+	    let finalamount = "0";
+	    let arryamount = amount.split(".");
+	    if (arryamount.length > 1) {
+	        let amountArray = arryamount[0].split('');
+	        let a = 0, b = 0;
+	        for (let i = amountArray.length - 1; i >= 0; i--) {
+	            if (a < 3) {
+	                stringBuilder.push(amountArray[i]);
+	                a++;
+	            } else if (b < 2) {
+	                if (b === 0) {
+	                    stringBuilder.push(",");
+	                    stringBuilder.push(amountArray[i]);
+	                    b++;
+	                } else {
+	                    stringBuilder.push(amountArray[i]);
+	                    b = 0;
+	                }
+	            }
+	        }
+	        finalamount = stringBuilder.reverse().join('') + "." + arryamount[1];
+	    } else {
+	        let amountArray = amount.split('');
+	        let a = 0, b = 0;
+	        for (let i = amountArray.length - 1; i >= 0; i--) {
+	            if (a < 3) {
+	                stringBuilder.push(amountArray[i]);
+	                a++;
+	            } else if (b < 2) {
+	                if (b === 0) {
+	                    stringBuilder.push(",");
+	                    stringBuilder.push(amountArray[i]);
+	                    b++;
+	                } else {
+	                    stringBuilder.push(amountArray[i]);
+	                    b = 0;
+	                }
+	            }
+	        }
+	        finalamount = stringBuilder.reverse().join('');
+	    }
+	    return finalamount;
+	}
+</script>
+
+
+
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-lg-12">	
+
+				<img src="/resources/img/header-homepage.jpg" width="100%">
+				
+			</div>
+		</div>
+	</div>
+	
+	<link href="/resources/css/innerPages.css" type="text/css" rel="stylesheet">
+	
+	<div style="clear: both;"></div>
+
+
+
+		
+	
+
+	<div class="PageTitle">Tender Details</div>
+	
+
+	<form id="viewTenderBean" name="viewTenderBean" action="null" method="post">
+
+
+		<div id="SecondModalBackgroundDiv" style="position: absolute; top: 0px; left: 0px; background-color: black; z-index: 100; opacity: 0.8; filter: alpha(opacity = 60); -moz-opacity: 0.8; overflow: hidden; display: none"></div>
+
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-lg-12">	
+
+		<!--  -->
+		
+		<!--  -->
+
+		<!--  -->
+
+		<div class="enqDiv">
+
+			<!-- enqLeft -->
+			<div class="enqLeft">
+
+				<!-- Current Tender Details	 -->
+				<div class="card">
+					<div class="card-heading">
+						<div class="card-title">
+							<span>Current Tender Details</span>
+						</div>
+					</div>
+
+					<div class="card-body">
+						<div class="table-responsive">
+							<table class="tablesorter-blue">
+								<tbody><tr>
+									<td width="25%" align="right"><span class="TextHead">
+											Tender ID </span></td>
+									<td width="25%" class="tdLeft"><span class="TextNormal">935202</span>
+									</td>
+									<td width="25%" align="right"><span class="TextHead">
+											Tender Notice Number </span></td>
+									<td width="25%" class="tdLeft"><span class="TextNormal">MAU61-USI0HB(BG)/14/2026-HB,Dated: 15/ 5/2026.</span>
+									</td>
+								</tr>
+								<tr>
+									<td align="right"><span class="TextHead">Name of
+											Work </span></td>
+									<td class="tdLeft"><span class="TextNormal">Construction of 2 nos of Amenities Buildings, Compound Wall and STPs and other amenities and finishes to GO TYPE I and II and Group D Employees Housing near Nelapadu, Amaravati, Andhra Pradesh  on Lump sum Contract (Percentage tender) System</span>
+									</td>
+									<td align="right"><span class="TextHead">Tender
+											Category</span></td>
+									<td width="20%" class="tdLeft"><span class="TextNormal">WORKS</span>
+									</td>
+								</tr>
+								<tr>
+									<td align="right"><span class="TextHead">Tender
+											Type</span></td>
+									<td class="tdLeft"><span class="TextNormal">OPEN
+											
+												
+														- NCB
+														
+												
+
+											
+									</span></td>
+									<td align="right"><span class="TextHead"> Estimated
+											Contract Value</span></td>
+									
+										
+											
+											
+												
+												
+													<td class="tdLeft"><span class="TextNormal">₹
+															67,69,61,075</span>
+<!-- 															 <span -->
+<!-- 														class="TextNormal">&#x20B9; -->
+
+															</td>
+												
+											
+										
+										
+									
+								</tr>
+								<tr>
+									<td align="right"><span class="TextHead">Submission
+											Closing Date</span></td>
+									<td class="tdLeft"><span class="TextNormal">16/06/2026 03:00 PM</span>
+									</td>
+									<td align="right"><span class="TextHead">Tender
+											Evaluation Type</span></td>
+									<td class="tdLeft"><span class="TextNormal">Percentage</span>
+									</td>
+								</tr>
+							</tbody></table>
+						</div>
+					</div>
+				</div>
+				<!-- Current Tender Details	 -->
+
+			</div>
+			<!-- enqLeft -->
+
+			<!-- enqRight -->
+			<div class="enqRight">
+
+				<div class="card">
+					<div class="card-heading">
+						<div class="card-title">
+							<span>Other Links</span>
+						</div>
+					</div>
+
+					<div class="card-body" style="padding: 0px !important;">
+						<div class="navBtnDiv">
+
+							<!--  -->
+							
+
+								
+									<div class="navBtn" onclick="fnviewBoqItemDetails('814395','815715','TenderDetailsHome.html')">
+										<img src="/resources/img/ico-boq-details.svg" title="BOQ Item Details"> BOQ Item Details
+									</div>
+								
+
+								
+									
+										<div class="navBtn" onclick="fnviewTenderDocuments('814395','815715','TenderDetailsHome.html')">
+											<img src="/resources/img/ico-tender-documents.svg" title="Tender Documents"> Tender Documents
+										</div>
+									
+								
+
+								
+
+								
+
+								
+
+							
+
+							
+							<!--  -->
+
+						</div>
+					</div>
+				</div>
+
+			</div>
+			<!-- enqRight -->
+
+		</div>
+
+		<!--  -->
+
+		<!-- Enquiry  Particulars Details Start-->
+		<div class="card">
+			<div class="card-heading">
+				<div class="card-title">
+					<span>Enquiry Particulars</span>
+				</div>
+			</div>
+
+			<div class="card-body">
+				<div class="table-responsive">
+
+					<table class="tablesorter-blue">
+						<tbody>
+							<tr>
+								<td width="20%" class="tdLeft"><span id="lblDepartmentName" class="Text">Department Name</span></td>
+								<td width="30%" class="tdLeft"><span id="lblDepartmentNameValue">MUNICIPAL ADMINISTRATION DEPARTMENT</span></td>
+
+								<td width="30%" class="tdLeft"><span id="lblCirclediv" class="Text">Circle/Division</span></td>
+								<td width="20%" class="tdLeft"><span id="lblCircleDivison">MUNICIPAL ADMINISTRATION DEPARTMENT-Amaravati Growth &amp; Infrastructure Corporation Limited Amaravati</span></td>
+							</tr>
+
+
+
+							<tr>
+								<td class="tdLeft"><span id="lblTenderId" class="Text">Tender
+										ID</span></td>
+								<td class="tdLeft"><span id="lblTenderIdValue">935202</span></td>
+
+								<td class="tdLeft"><span id="lblTenderNo" class="Text">IFB
+										No / Tender Notice Number</span></td>
+								<td class="tdLeft"><span id="lblTenderNoValue">MAU61-USI0HB(BG)/14/2026-HB,Dated: 15/ 5/2026.</span></td>
+							</tr>
+
+							<tr>
+								<td class="tdLeft"><span id="lblNameOfProject" class="Text">Name
+										of Project</span></td>
+								<td class="tdLeft"><span id="lblNameOfProjectValue">Construction of 2 nos of Amenities Buildings, Compound Wall and STPs and other amenities and finishes to GO TYPE I and II and Group D Employees Housing near Nelapadu, Amaravati, Andhra Pradesh  on Lump sum Contract (Percentage tender) System</span></td>
+
+								<td class="tdLeft"><span id="lblNameWorkMaterial" class="Text">Name of Work </span></td>
+								<td class="tdLeft"><span id="lblNameWorkMaterialValue">Construction of 2 nos of Amenities Buildings, Compound Wall and STPs and other amenities and finishes to GO TYPE I and II and Group D Employees Housing near Nelapadu, Amaravati, Andhra Pradesh  on Lump sum Contract (Percentage tender) System</span></td>
+							</tr>
+							<tr>
+								<td class="tdLeft"><span id="lblNameWorkMaterial" class="Text">Estimated Contract Value(INR)</span></td>
+								<td class="tdLeft"><div style="float: left">
+										
+										
+
+											<span>₹
+												67,69,61,075</span>
+										
+										&nbsp;
+
+									</div> <input type="hidden" name="lblEcvValue" value="67,69,61,075" id="lblEcvValue">
+									&nbsp;&nbsp;&nbsp;
+									<div id="amuntWords" style="float: left">
+										(<span id="txtAmountinWords" style="color: black"> Sixty Seven Crore Sixty Nine Lakh Sixty One Thousand and Seventy Five Rupees </span>)
+									</div></td>
+
+								<td class="tdLeft"><span id="lblDeliveryPeriod" class="Text">Period of Completion/ Delivery Period (in months)</span></td>
+								
+								
+									<td class="tdLeft"><span id="lblDeliveryPeriodValue">8</span></td>
+								
+							</tr>
+
+							<tr>
+								
+								
+								
+								
+									<td class="tdLeft"><span id="lbltypeofwork" class="Text">Type of Work</span></td>
+								
+								
+								<td class="tdLeft"><span id="lbltypeofworkvalue">Civil Engineering Works</span></td>
+
+								<td class="tdLeft"><span id="lblBiddingType" class="Text">Bidding Type</span></td>
+								
+								<td class="tdLeft"><span id="lblBiddingTypeValue">OPEN</span></td>
+								
+							</tr>
+
+							
+								<tr>
+									<td class="tdLeft"><span id="lblBidCalls" class="Text">Bid
+											Call (Numbers)</span></td>
+									
+									
+									
+										<td class="tdLeft" colspan="100%"><span id="lblBidCallsValue">1</span></td>
+									
+								</tr>
+							
+
+							<!--Added by mahesh.04/03/2015  -->
+							<tr>
+								<td class="tdLeft"><span id="VTMSBodyContent_lblTenderCategory" class="Text">Tender
+										Category</span></td>
+								<td class="tdLeft"><span id="VTMSBodyContent_lblTenderCategoryValue">WORKS</span></td>
+
+								<td class="tdLeft"><span id="VTMSBodyContent_lblCurrencyType" class="Text">Currency Type</span></td>
+								<td class="tdLeft"><span id="VTMSBodyContent_lblCurrencyTypeValue">(INR)  </span></td>
+							</tr>
+							
+							<tr>
+								<td class="tdLeft"><span id="VTMSBodyContent_lblCurrencySettings" class="Text">Default
+										Currency</span></td>
+								<td class="tdLeft">Indian Rupee - INR</td>
+
+								<td class="tdLeft"><span id="VTMSBodyContent_lblEvaluationType" class="Text">Evaluation
+										Type</span></td>
+								<td class="tdLeft"><span id="VTMSBodyContent_lblEvaluationType1">Percentage</span></td>
+							</tr>
+							<tr>
+								<td class="tdLeft" width="20%"><span id="VTMSBodyContent_lblEvaluationCritieria" class="Text">Evaluation Criteria</span></td>
+								<td class="tdLeft" colspan="100%">
+									<span id="VTMSBodyContent_lblEvaluationCritieria1">Based on Price </span>
+								</td>
+							</tr>
+							
+							<input type="hidden" id="hdnFileName" name="hdnFileName" value="2-Works-Percentage-DoublePacketBidSubmission.pdf">
+							<input type="hidden" id="hdnFilePath" name="hdnFilePath" value="/appdata/trainingkits/">
+							
+							
+							
+							
+								<tr>
+									<td class="tdLeft"><span id="lblBidCalls" class="Text">Form Of Contract </span></td>
+									
+									
+										<td class="tdLeft" colspan="100%"><span id="lblBidCallsValue1">L.S</span></td>
+									
+									
+									
+									
+									
+									
+									
+									
+									
+								</tr>
+								
+								<tr id="tr_consortiumJointVenture" class="GridRow">
+									<td width="20%" class="tdLeft"><label>Consortium/ Joint Venture</label></td>
+									
+									
+										<td class="tdLeft" colspan="100%"><span>Not Applicable</span></td>
+									
+								</tr>
+								
+								
+
+								
+								
+							
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+		<!-- Enquiry  Particulars Details END-->
+
+
+
+		<!--Transaction Fee Details Start  -->
+		
+
+			<div class="card">
+				<div class="card-heading">
+					<div class="card-title">
+						<span id="lblTenderDocFeeDetails">Transaction Fee Details</span>
+					</div>
+				</div>
+
+				<div class="card-body">
+					<div class="table-responsive">
+						<table class="tablesorter-blue">
+							<tbody>
+								<tr>
+									<td width="40%" class="tdLeft">Transaction Fee Payable to
+										'APTS '
+										payable at Vijayawada.<br> (As per G.O.Ms No 4,Dtd
+										17.02.2015 IT&amp;C Dept)
+									</td>
+									<td class="tdLeft"><span id="mTransactionFee">29500
+											(INR)</span></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+
+		
+
+		
+		<!--Transaction Fee Details END  -->
+
+
+
+		<!--Tender Dates Start  -->
+
+		<div class="card">
+			<div class="card-heading">
+				<div class="card-title">
+					<span id="VTMSBodyContent_lblTenderDates">Tender Dates</span>
+				</div>
+			</div>
+
+			<div class="card-body">
+				<div class="table-responsive">
+
+					<table class="tablesorter-blue" border="0">
+						<tbody><tr>
+							<td width="20%" class="tdLeft"><span id="lblBidDocDownStartingDate" class="Text">Start Date &amp; Time</span></td>
+							<td colspan="100%" class="tdLeft"><span id="lblBidDocDownStartingDateValue">16/05/2026 06:00 PM</span></td>
+						</tr>
+						
+							
+
+								<tr>
+									<td width="20%" class="tdLeft"><span id="lblBidDocDownloadDate" class="Text">Pre-bid Meeting
+											Date and Time</span></td>
+									<td width="30%" class="tdLeft"><span id="lblBidDocDownloadDateValue">25/05/2026 11:00 AM</span></td>
+									<td width="20%" class="tdLeft"><span id="lblBidDocDownloadDate" class="Text">Pre-bid
+											Clarifications Issue Date/ Start Date and Time</span></td>
+									<td width="30%" class="tdLeft"><span id="lblBidDocDownloadDateValue">27/05/2026 02:00 PM</span></td>
+								</tr>
+
+							
+							
+						
+						<tr>
+							<td width="20%" class="tdLeft"><span id="lblBidSubmissionClosingDate" class="Text">Closing Date &amp; Time</span></td>
+							<td width="30%" class="tdLeft"><span id="lblBidSubmissionClosingDateValue">16/06/2026 03:00 PM</span></td>
+						
+							<td width="20%" class="tdLeft"><span id="lblBidValidityPeriod" class="Text">Bid Validity Period (in Days)</span></td>
+							<td width="30%" class="tdLeft"><span id="lblBidValidityPeriodValue">90</span></td>
+						</tr>
+
+						
+						
+							<tr>
+								<td class="GridEvenRow" width="20%"><span class="TextHead">Display Rank</span></td>
+								<td class="tdLeft" colspan="100%">
+										<span path="bDisplayRank" id="bDisplayRank">Lowest</span>
+									  </td>
+							</tr>
+						
+
+
+
+					</tbody></table>
+
+
+				</div>
+			</div>
+		</div>
+		<!--Tender Dates END  -->
+
+		<!--Pre Bid Dates Start  -->
+		<div id="preBidHideArea" style="display: none;">
+
+			<div class="card">
+				<div class="card-heading">
+					<div class="card-title">
+						<span>Enquiry Particulars</span>
+					</div>
+				</div>
+
+				<div class="card-body">
+					<div class="table-responsive">
+
+						<table class="tablesorter-blue">
+							<tbody>
+								<tr>
+									<td width="1%" class="GridHeader" nowrap="nowrap" valign="top"><img></td>
+									<td width="3%" valign="middle" nowrap="nowrap" class="GridHeader"><span id="VTMSBodyContent_lblSanctionHeader">Pre Bid Meeting</span></td>
+									<td width="1%" class="GridHeader" nowrap="nowrap" valign="top"><img></td>
+									<td width="95%" valign="bottom" class="tdSpacer">&nbsp;</td>
+								</tr>
+							</tbody>
+						</table>
+
+						<div>
+
+							<table class="tablesorter-blue" border="0">
+
+								<tbody><tr>
+									<td width="40%" class="tdLeft"><span class="TextHead">
+											Pre Bid Meeting</span></td>
+									<td class="tdLeft"><span id="VTMSBodyContent_lblMeetingStatus">Offline
+									</span></td>
+								</tr>
+							</tbody></table>
+
+						</div>
+
+						<div>
+							<table class="tablesorter-blue" border="0" id="VTMSBodyContent_tblOffline">
+								<tbody><tr>
+									<td width="40%" class="tdLeft"><span class="TextHead">Pre
+											Bid Meeting Opening Date &amp; Time</span></td>
+									<td class="tdLeft"><span id="VTMSBodyContent_lblBidOpeningDateOff">25/05/2026 11:00 AM</span></td>
+								</tr>
+							</tbody></table>
+						</div>
+
+						<div id="PreBidClosingdate" style="display: none;">
+
+							<table class="tablesorter-blue" border="0" id="VTMSBodyContent_tblOffline">
+								<tbody><tr>
+									<td width="40%" class="tdLeft"><span class="TextHead">Pre
+											Bid Meeting Closing Date &amp; Time</span></td>
+									<td class="tdLeft"><span id="VTMSBodyContent_lblBidOpeningDateOff"></span></td>
+								</tr>
+							</tbody></table>
+						</div>
+
+					</div>
+				</div>
+			</div>
+
+		</div>
+
+
+		<!--Pre Bid Dates END  -->
+
+		<!--Tender Inviting Authority Particulars Start  -->
+		<div class="card">
+			<div class="card-heading">
+				<div class="card-title">
+					<span id="VTMSBodyContent_lblOtherDetails">Tender Inviting
+						Authority Particulars</span>
+				</div>
+			</div>
+
+			<div class="card-body">
+				<div class="table-responsive">
+
+					<table class="tablesorter-blue" border="0">
+
+						
+						<tbody><tr>
+							<td width="20%" class="tdLeft"><span id="VTMSBodyContent_lblOfficerInvitingBids" class="Text">Officer
+									Inviting Bids</span></td>
+							<td class="tdLeft" width="30%"><span id="VTMSBodyContent_lblOfficerInvitingBidsValue">MD AGICL</span></td>
+						
+							<td width="20%" class="tdLeft"><span id="VTMSBodyContent_lblBidOpeningAuthority" class="Text">Bid
+									Opening Authority</span></td>
+							<td class="tdLeft" width="30%"><span id="VTMSBodyContent_lblBidOpeningAuthorityValue">Chief Engineer, AGICL</span></td>
+						</tr>
+						<tr>
+							<td width="20%" class="tdLeft"><span id="VTMSBodyContent_lblAddress" class="Text">Address</span></td>
+							<td width="30%" class="tdLeft"><span id="VTMSBodyContent_lblAddressValue">Amaravati</span></td>
+						
+							<td width="20%" class="tdLeft"><span id="VTMSBodyContent_lblContactDetails" class="Text">Contact
+									Details</span></td>
+							<td width="30%" class="tdLeft"><span id="VTMSBodyContent_lblContactDetailsValue">8977731402</span></td>
+						</tr>
+
+						<tr>
+							<td width="20%" class="tdLeft"><span id="VTMSBodyContent_lblsEMail" class="Text">Email</span></td>
+							<td class="tdLeft" colspan="100%"><span id="VTMSBodyContent_lblsEMailValue">srinivasarao.b1964@apcrda.org</span></td>
+						</tr>
+
+
+					</tbody></table>
+				</div>
+			</div>
+		</div>
+		<!--Tender Inviting Authority Particulars END  -->
+
+
+		<!--Bid Security Details Start -->
+		
+
+			<div class="card">
+				<div class="card-heading">
+					<div class="card-title">
+						<span id="lblTenderDocFeeDetails">Bid Security Details</span>
+					</div>
+				</div>
+
+				<div class="card-body">
+					<div class="table-responsive">
+
+						
+
+							<table border="0" class="tablesorter-blue">
+								<tbody>
+									<tr>
+										<td width="20%" class="tdLeft"><span id="lblBidSecurityPayable" class="Text">Bid Security
+												(INR)</span></td>
+										<td width="30%" class="tdLeft">Rs.<span id="lblBidSecurityPayableValue">6769611.00</span></td>
+									
+										<td width="20%" class="tdLeft"><span id="lblBidSecurityPayable" class="Text">Bid Security
+												In Favour Of </span></td>
+										<td width="30%" class="tdLeft"><span id="lblBidSecurityPayableValue">Andhra Pradesh Capital Region Development Authority (APCRDA)</span></td>
+									</tr>
+									<tr>
+										<td width="20%" class="tdLeft"><span id="lblBidSecurityPayable" class="Text">Mode of
+												Payment</span></td>
+										<td class="tdLeft" colspan="100%"><span id="lblBidSecurityPayableValue">Online Payment,Challan Generation,BG</span></td>
+									</tr>
+								</tbody>
+							</table>
+						
+
+
+						
+
+					</div>
+				</div>
+			</div>
+
+		
+		<!--Bid Security Details END -->
+
+		<!-- Process Fee Details Start -->
+
+		
+
+			<div class="card">
+				<div class="card-heading">
+					<div class="card-title">
+						<span>
+								
+								
+									Process Fee Details
+								
+							</span>
+					</div>
+					<label id="messages" class="StatusRed"></label>
+				</div>
+
+				<div class="card-body">
+					<div class="table-responsive">
+
+						<table class="tablesorter-blue">
+
+							<thead>
+								<tr>
+
+									
+										
+										
+											<th>Process Fee</th>
+											<th>Process Fee Payable To</th>
+
+										
+									
+
+								</tr>
+
+							</thead>
+
+							<tbody>
+
+
+								<tr>
+									<td class="tdCenter" width="40%">
+										20000.00(INR)</td>
+									<td class="tdCenter"></td>
+								</tr>
+
+
+							</tbody>
+						</table>
+
+					</div>
+				</div>
+			</div>
+
+		
+
+
+		<!-- Process Fee Details END -->
+
+		<!-- Supporting documents required Start -->
+
+		
+			<div id="RequiredTenderDocumentsHidden">
+
+				<div class="card">
+					<div class="card-heading">
+						<div class="card-title">
+							<span id="VTMSBodyContent_lblRequiredTenderDocumentsDetails">Required
+								Tender Documents Details</span>
+						</div>
+					</div>
+
+					<div class="card-body">
+						<div class="table-responsive">
+
+							<table id="VTMSBodyContent_TenderDetailsGridView" class="tablesorter-blue">
+								<thead>
+									<tr>
+										<th class="tdCenter">S.No</th>
+										<th class="tdCenter">Document Name</th>
+										<th class="tdCenter">Stage</th>
+										<th class="tdCenter">Document Type</th>
+									</tr>
+								</thead>
+								<tbody>
+
+									
+
+									
+
+
+										<tr>
+											<td class="tdCenter" width="5%">1</td>
+											<td class="tdCenter">Letter of bid (including certificate and declaration)</td>
+											<td class="tdCenter">COMMON</td>
+											<td class="tdCenter">
+															Mandatory
+														 </td>
+										</tr>
+
+									
+
+
+										<tr>
+											<td class="tdCenter" width="5%">2</td>
+											<td class="tdCenter">Form 1 - Bidder Information Form</td>
+											<td class="tdCenter">COMMON</td>
+											<td class="tdCenter">
+															Mandatory
+														 </td>
+										</tr>
+
+									
+
+
+										<tr>
+											<td class="tdCenter" width="5%">3</td>
+											<td class="tdCenter">Form 2 - Historical Contract Non- Performance, Pending Litigation and Litigation History</td>
+											<td class="tdCenter">COMMON</td>
+											<td class="tdCenter">
+															Mandatory
+														 </td>
+										</tr>
+
+									
+
+
+										<tr>
+											<td class="tdCenter" width="5%">4</td>
+											<td class="tdCenter">Annual Financial turnover in the last 10 financial years in the Bidders name in Statement-I with supporting certificates</td>
+											<td class="tdCenter">COMMON</td>
+											<td class="tdCenter">
+															Mandatory
+														 </td>
+										</tr>
+
+									
+
+
+										<tr>
+											<td class="tdCenter" width="5%">5</td>
+											<td class="tdCenter">Details of similar works completed as Prime Contractor during the last ten financial Years in Statement-II with supporting certificates.</td>
+											<td class="tdCenter">COMMON</td>
+											<td class="tdCenter">
+															Mandatory
+														 </td>
+										</tr>
+
+									
+
+
+										<tr>
+											<td class="tdCenter" width="5%">6</td>
+											<td class="tdCenter">Details of Projects satisfactorily completed in statement - III along with completion/experience certificates including STPs capacity in MLD/KLD</td>
+											<td class="tdCenter">COMMON</td>
+											<td class="tdCenter">
+															Mandatory
+														 </td>
+										</tr>
+
+									
+
+
+										<tr>
+											<td class="tdCenter" width="5%">7</td>
+											<td class="tdCenter">Details of bidder in Statement-IV</td>
+											<td class="tdCenter">COMMON</td>
+											<td class="tdCenter">
+															Mandatory
+														 </td>
+										</tr>
+
+									
+
+
+										<tr>
+											<td class="tdCenter" width="5%">8</td>
+											<td class="tdCenter">Availability of critical equipment in Statement V.</td>
+											<td class="tdCenter">COMMON</td>
+											<td class="tdCenter">
+															Mandatory
+														 </td>
+										</tr>
+
+									
+
+
+										<tr>
+											<td class="tdCenter" width="5%">9</td>
+											<td class="tdCenter">Availability of Key personnel in Statement. VI.</td>
+											<td class="tdCenter">COMMON</td>
+											<td class="tdCenter">
+															Mandatory
+														 </td>
+										</tr>
+
+									
+
+
+										<tr>
+											<td class="tdCenter" width="5%">10</td>
+											<td class="tdCenter">Litigation history in Statement VII</td>
+											<td class="tdCenter">COMMON</td>
+											<td class="tdCenter">
+															Mandatory
+														 </td>
+										</tr>
+
+									
+
+
+										<tr>
+											<td class="tdCenter" width="5%">11</td>
+											<td class="tdCenter">Financial Situation and Performance - Proof of liquid assets in the shape of Solvency certificates etc., for the required amount as per Statement VIII</td>
+											<td class="tdCenter">COMMON</td>
+											<td class="tdCenter">
+															Mandatory
+														 </td>
+										</tr>
+
+									
+
+
+										<tr>
+											<td class="tdCenter" width="5%">12</td>
+											<td class="tdCenter">Proposed Work Plan and Methodology as per Statement IX</td>
+											<td class="tdCenter">COMMON</td>
+											<td class="tdCenter">
+															Mandatory
+														 </td>
+										</tr>
+
+									
+
+
+										<tr>
+											<td class="tdCenter" width="5%">13</td>
+											<td class="tdCenter">Calculation of Bid capacity as per Statement X</td>
+											<td class="tdCenter">COMMON</td>
+											<td class="tdCenter">
+															Mandatory
+														 </td>
+										</tr>
+
+									
+
+
+										<tr>
+											<td class="tdCenter" width="5%">14</td>
+											<td class="tdCenter">Format 1 and 2 - Form of Bid Security</td>
+											<td class="tdCenter">COMMON</td>
+											<td class="tdCenter">
+															Mandatory
+														 </td>
+										</tr>
+
+									
+
+
+										<tr>
+											<td class="tdCenter" width="5%">15</td>
+											<td class="tdCenter">Format 3 Power of Attorney</td>
+											<td class="tdCenter">COMMON</td>
+											<td class="tdCenter">
+															Mandatory
+														 </td>
+										</tr>
+
+									
+
+
+										<tr>
+											<td class="tdCenter" width="5%">16</td>
+											<td class="tdCenter">Environmental and Social Performance Declaration (Annex 1)</td>
+											<td class="tdCenter">COMMON</td>
+											<td class="tdCenter">
+															Mandatory
+														 </td>
+										</tr>
+
+									
+
+
+										<tr>
+											<td class="tdCenter" width="5%">17</td>
+											<td class="tdCenter">Sexual Exploitation and Abuse (SEA) and/or Sexual Harassment Performance Declaration (Annex 2)</td>
+											<td class="tdCenter">COMMON</td>
+											<td class="tdCenter">
+															Mandatory
+														 </td>
+										</tr>
+
+									
+
+
+										<tr>
+											<td class="tdCenter" width="5%">18</td>
+											<td class="tdCenter">Sexual Exploitation and Abuse (SEA) and/or Sexual Harassment Performance Declaration for Subcontractors (Annex 3)</td>
+											<td class="tdCenter">COMMON</td>
+											<td class="tdCenter">
+															Mandatory
+														 </td>
+										</tr>
+
+									
+
+
+										<tr>
+											<td class="tdCenter" width="5%">19</td>
+											<td class="tdCenter">Management Strategies and Implementation Plans (MSIP)</td>
+											<td class="tdCenter">COMMON</td>
+											<td class="tdCenter">
+															Mandatory
+														 </td>
+										</tr>
+
+									
+
+
+										<tr>
+											<td class="tdCenter" width="5%">20</td>
+											<td class="tdCenter">List of any other certificates enclosed</td>
+											<td class="tdCenter">COMMON</td>
+											<td class="tdCenter">
+															Mandatory
+														 </td>
+										</tr>
+
+									
+
+
+										<tr>
+											<td class="tdCenter" width="5%">21</td>
+											<td class="tdCenter">Attested copies of documents relating to GST Registration with Government of Andhra Pradesh, PAN card, Income tax returns along with proof of submission (ITRV) from IT department etc.,</td>
+											<td class="tdCenter">COMMON</td>
+											<td class="tdCenter">
+															Mandatory
+														 </td>
+										</tr>
+
+									
+
+
+										<tr>
+											<td class="tdCenter" width="5%">22</td>
+											<td class="tdCenter">Special Class Civil registration having been registered with Government of Andhra Pradesh.</td>
+											<td class="tdCenter">COMMON</td>
+											<td class="tdCenter">
+															Mandatory
+														 </td>
+										</tr>
+
+									
+
+
+								</tbody>
+							</table>
+
+						</div>
+					</div>
+				</div>
+
+			</div>
+		
+
+		<!-- Supporting documents required END -->
+
+
+		<!--   TermsAndConditions  Start-->
+		<div id="termsAndConditionListHidden">
+
+			<div class="card">
+				<div class="card-heading">
+					<div class="card-title">
+						<span id="VTMSBodyContent_lblGenralTermsAndConditionsEligibility">General
+							Terms and Conditions/ Eligibility</span>
+					</div>
+				</div>
+
+				<div class="card-body">
+					<div class="table-responsive">
+
+						<table class="tablesorter-blue" border="0">
+
+							<tbody>
+								<tr>
+									<td class="tdLeft">
+										As per Tender document</td>
+								</tr>
+							</tbody>
+						</table>
+
+
+
+
+					</div>
+				</div>
+			</div>
+
+			<div class="card">
+				<div class="card-heading">
+					<div class="card-title">
+						<span id="VTMSBodyContent_lblGenralTermsAndConditionsEligibility">General
+							Technical Terms and Conditions (Procedure)</span>
+					</div>
+				</div>
+
+				<div class="card-body">
+					<div class="table-responsive">
+
+						<table class="tablesorter-blue" border="0">
+
+							<tbody>
+								<tr>
+									<td class="tdLeft"><span id="VTMSBodyContent_lblTechnicalTC">As per Tender document</span>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+
+
+
+
+					</div>
+				</div>
+			</div>
+
+			<div class="card">
+				<div class="card-heading">
+					<div class="card-title">
+						<span id="VTMSBodyContent_lblLegalTermsAndConditions">Legal
+							Terms &amp; Conditions</span>
+					</div>
+				</div>
+
+				<div class="card-body">
+					<div class="table-responsive">
+
+						<table class="tablesorter-blue" border="0">
+
+							<tbody>
+								<tr>
+									<td class="tdLeft"><span id="VTMSBodyContent_lblLegalTC">As per Tender document</span></td>
+								</tr>
+							</tbody><tbody>
+						</tbody></table>
+					</div>
+				</div>
+			</div>
+
+			<div id="ProcedureforBidSubmissionHidden">
+
+				<div class="card">
+					<div class="card-heading">
+						<div class="card-title">
+							<span id="VTMSBodyContent_lblProcedureForBidSubmission">Procedure
+								for Bid Submission</span>
+						</div>
+					</div>
+
+					<div class="card-body">
+						<div class="table-responsive">
+
+							<table class="tablesorter-blue" border="0">
+								<tbody>
+									<tr>
+										<td class="tdCenter"><a href="#" onclick="toggle_visibility('foo');"> Procedure for Bid Submission</a>
+											<div id="foo" style="display: none;">
+												<br> <span id="VTMSBodyContent_lblProcedure">The bidder shall submit his response through Bid submission to the tender on eProcurement platform at www.apeprocurment.gov.in by following the procedure given below. The bidder would be required to register on the e-procurement market place https://tender.apeprocurement.gov.in and submit their bids online. Offline bids shall not be entertained by the Tender Inviting Authority for the tenders published in e-procurement platform.
+
+The bidders shall submit their eligibility and qualification details, Technical bid, Financial bid etc., in the online standard formats displayed in eProcurement web site. The bidders shall upload the scanned copies of all the relevant certificates, documents etc., in support of their eligibility criteria/technical bids and other certificate/documents in the eProcurement web site. The bidder shall sign on the statements, documents, certificates, uploaded by him, owning responsibility for their correctness/authenticity. The bidder shall attach all the required documents for the specific tender after uploading the same during the bid submission as per the tender notice and bid document.
+
+The Bidder shall also ensure prior to Final Bid submission that the Encryption certificate present in the DSC Key token is the same as that mapped into his Profile page in the Eprocurement system. Service provider shall not be responsible for Non-submission of Bid in case there is a variance in the Encryption certificate between the Key token and the Uploaded certificate in the Bidders profile in the Eprocurement system. 
+
+Registration with eProcurement platform: For registration and online bid submission bidders may contact HELP DESK.
+
+https://tender.apeprocurement.gov.in
+
+Digital Certificate authentication:
+
+The bidder shall authenticate the bid with his Digital Certificate for submitting the bid electronically on eProcurement platform and the bids not authenticated by digital certificate of the bidder will not be accepted on the eProcurement platform. 
+For obtaining Digital Signature Certificate, you may please Contact:
+
+You may please Contact Registration Authorities of any Certifying Authorities in India. The list of CAs are available by clicking the link https://tender.apeprocurement.gov.in/digital-signature.html#
+
+3. Hard copies:
+
+i) Vide ref. G.O.Ms.No.174, I&amp;CAD dept dated:1-9-2008, submission of original hard copies of the uploaded scanned copies of Proof of online Payment (Remittance)/BG towards EMD by participating bidders to the tender inviting authority before the opening of the price bid is dispensed forthwith.
+
+ii) All the bidders shall invariably upload the scanned copies of Proof of online Payment (Remittance)/BG in eProcurement system and this will be the primary requirement to consider the bid responsive.
+
+iii) The department shall carry out the technical evaluation solely based on the uploaded certificates/documents, Proof of online Payment (Remittance)/BG towards EMD in the eProcurement system and open the price bids of the responsive bidders.
+
+iv) The department will notify the successful bidder for submission of original hardcopies of all the uploaded documents Proof of online Payment (Remittance)/BG towards EMD prior to entering into agreement.
+
+v) The successful bidder shall invariably furnish the original Proof of online Payment (Remittance)/BG towards EMD, Certificates/Documents of the uploaded scan copies to the Tender Inviting Authority before entering into agreement, either personally or through courier or post and the receipt of the same within the stipulated date shall be the responsibility of the successful bidder. The department will not take any responsibility for any delay in receipt/non-receipt of original Proof of online Payment (Remittance)/BG towards EMD, Certificates/Documents from the successful bidder before the stipulated time. On receipt of documents, the department shall ensure the genuinity of the Proof of online Payment (Remittance)/BG towards EMD and all other certificates/documents uploaded by the bidder in eProcurement system. In support of the qualification criteria before concluding the agreement.
+
+4. The GO. Ms. No. 174 -I&amp;CAD dated: 1-9-2008
+
+Deactivation of Bidders If any successful bidder fails to submit the original hard copies of uploaded certificates/documents, Proof of online Payment (Remittance)/BG towards EMD within stipulated time or if any variation is noticed between the uploaded documents and the hardcopies submitted by the bidder, as the successful bidder will be suspended from participating in the tenders on eProcurement platform for a period of 3 years. The eProcurement system would deactivate the user ID of such defaulting bidder based on the trigger/recommendation by the Tender Inviting Authority in the system. Besides this, the department shall invoke all processes of law including criminal prosecution of such defaulting bidder as an act of extreme deterrence to avoid delays in the tender process for execution of the development schemes taken up by the government. Other conditions as per tender document are applicable.
+
+The bidder is requested to get a confirmed acknowledgement from the Tender Inviting Authority a proof of Hardcopies submission to avoid any discrepancy.
+
+5. Payment of EMD:
+
+It is mandatory for all participant bidders to electronically pay EMD Online by utilizing the 'Payment Gateway Service on E-Procurement platform'. The Electronic Payment Gateway accepts all Master and Visa Credit Cards issued by any bank and Direct Debit facility/Net Banking/NEFT payment modes through ICICI Bank and/or Axis Bank Payment Gateways to facilitate the transaction. This is in compliance as per G.O.Ms. 08 dated 08.05.2016. A GST of 18.00% + Bank charges on the transaction amount payable to APTS  shall be applicable. In addition to this, Bidders can also pay the EMD through Download of PDF format of RTGS Challan for respective Payment gateway and pay the EMD through their Parent Bank account. Once the EMD is received by the EProcurement application, Bidders can automatically continue with their Bid Submission online.
+
+IMPORTANT NOTE REGARDING EMD PAYMENT:
+
+1. Bidders are encouraged to use only Net banking facility for payment of EMDs as far as possible for faster refunds in case of unsuccessful Bids for the Tender. 
+
+2. Bidders are advised not to use RTGS Challan downloads at the penultimate hour of Bid submission closing as any delay by their banker would not enable Bid submission on the platform. Please allow a minimum of 60 minutes for enabling 'Continuation of Bid Submission' from the time the Pool Account receives credit of the EMD from the Bidders Bank for both NEFT and RTGS Transfers. For RTGS Transfers, the Pool Account can get immediate credit whereas NEFT transfers would follow RBI Payment Cycle time. 
+
+3. Bidders are advised to pay EMD Online atleast T-1 or T-2 days before Bid submission closing date (T= Bid submission closing date) to avoid last minute delays and denials of successful Bid submission and to take care of any delays in Banking procedures.
+
+Un Successful Bidder EMD Refund process: -
+
+The bid is declared unsuccessful, under the following circumstances.
+Bid submitted by the bidder is not the lowest bid.
+Upon Finalization of the L1 Bid.
+Technical Disqualification of the Bid in case of 2 cover system.
+EMD paid but bid not submitted
+
+EMD refund will be initiated by the Tender Inviting Authority directly and through Online only and through the same payment channels as EMD received by the Department. (RTGS / NEFT /Credit Card /Debit Card refund), within 30 days from the date of publishing the Decision / Result. However, Service Provider /GoAP will not be held responsible for the delays occurring due to banking channels/procedures/processes of the respective vendor.
+
+IMPORTANT NOTE REGARDING EMD REFUNDS:
+
+Bidders are requested to use discretion in their choice of payment channel for remittance of EMD.
+
+Time taken for Refunds under Ideal conditions:  
+
+1. Net Banking / NEFT / RTGS Challan: &nbsp;One (1) Banking Business Day from time of initiation of refund by Tender Inviting Authority subject to RTGS/NEFT timings of RBI. 
+2. Credit card/ Debit card: 7-10 working days from time of initiation of refund by the Tender Inviting Authority. However, this may be longer in case of certain bank cards. In case of delays, bidders are requested to contact the Card issuing Bank for faster resolution.
+
+6. Payment of Transaction Fee:
+It is mandatory for all the participant bidders from 1st January 2006 to electronically pay a Non-refundable Transaction fee to M/s. APTS , the service provider through 'Payment Gateway Service on E-Procurement platform'. The Electronic Payment Gateway accepts all Master and Visa Credit Cards issued by any bank and Direct Debit facility/Net Banking of ICICI Bank, Axis Bank to facilitate the transaction. This is in compliance as per G.O.Ms. 13 dated 07.05.2006. A GST of 18.00% + Bank charges on the transaction amount payable to APTS  shall be applicable.
+
+The participating bidders will pay  a transaction fee @ 0.03% of ECV (estimated contract value) with a cap of Rs.10,000/- (Rupees ten thousand only) for all works with ECV upto Rs.50 crores, and Rs.25,000/- (Rupees twenty five thousand only) for works with ECV above Rs.50 crores, at the time of bid submission electronically. For tenders wherever ECV is not available i.e., for goods and services, the transaction fee shall be calculated on quoted value. GST as levied by the GOI on transaction fee, electronic payment gateway charges shall be borne by the bidders.
+
+
+7. Corpus Fund: 
+As per GO MS No.4 User departments shall collect 0.04% of ECV (estimated contract value) with a cap of Rs. 10,000 (Rupees ten thousand only) for all works with ECV upto Rs.50 Crores, and Rs. 25,000/- (Rupees twenty-five thousand only) for works with ECV above Rs.50 Crores, from successful bidders on eProcurement platform before entering into agreement / issue of purchase orders, towards eprocurement fund in favour of Managing Director, APTS . There shall not be any charge towards eProcurement fund in case of works, goods and services with ECV less than and upto Rs. 10 lakhs 
+
+8. Tender Document:
+The bidder is requested to download the tender document and read all the terms and conditions mentioned in the tender Document and seek clarification if any from the Tender Inviting Authority. Any offline bid submission clause in the tender document could be neglected.
+The bidder has to keep track of any changes by viewing the Addendum/Corrigenda issued by the Tender Inviting Authority on time-to- time basis in the E-Procurement platform. The Department calling for tenders shall not be responsible for any claims/problems arising out of this. 
+
+9. Bid Submission Acknowledgement:
+The bidder shall complete all the processes and steps required for Bid submission. The system will generate an acknowledgement with a unique bid submission number after completing all the prescribed steps and processes by the bidder. Users may also note that the bids for which an acknowledgement is not generated by the e-procurement system are treated as invalid or not saved in the system. Such invalid bids are not made available to the Tender Inviting Authority for processing the bids. The Government of AP are not responsible for incomplete bid submission by users.</span>
+											</div></td>
+									</tr>
+								</tbody><tbody>
+							</tbody></table>
+						</div>
+					</div>
+				</div>
+
+			</div>
+
+		</div>
+		<!--  Start TermsAndConditions  END-->
+
+
+		<!--Geographical Particulars  Start  -->
+		
+			<div id="GeograchicalHidden">
+
+				<div class="card">
+					<div class="card-heading">
+						<div class="card-title">
+							<span id="VTMSBodyContent_lblGeographicalParticulars">Geographical
+								Particulars </span>
+						</div>
+					</div>
+
+					<div class="card-body">
+						<div class="table-responsive">
+
+							
+
+							<table width="100%" class="tablesorter-blue">
+								<thead>
+
+									<tr class="tdLeft">
+										<th class="tdCenter">Sno</th>
+										<!-- <th class="tdCenter">SubWork Name</th> -->
+										<th class="tdCenter">State</th>
+										<th class="tdCenter">District</th>
+										<th class="tdCenter">Mandal</th>
+										<th class="tdCenter">Assembly</th>
+										<th class="tdCenter">Parliament</th>
+
+									</tr>
+								</thead>
+								<tbody>
+
+
+									
+										
+
+											<tr>
+												<td id="number" class="tdCenter">
+													1
+												</td>
+
+												<td class="tdCenter">ANDHRA PRADESH</td>
+												<td class="tdCenter">GUNTUR</td>
+												<td class="tdCenter">THULLUR</td>
+												<td class="tdCenter">TADIKONDA(SC)</td>
+												<td class="tdCenter">GUNTUR</td>
+											</tr>
+										
+									
+									
+								</tbody>
+							</table>
+
+						</div>
+					</div>
+				</div>
+
+			</div>
+		
+		<!--Geographical Particulars  END  -->
+
+		<!--Enquiry Forms Start -->
+		
+			<div id="stageListHidden">
+
+				<div class="card">
+					<div class="card-heading">
+						<div class="card-title">
+							<span id="VTMSBodyContent_lblOtherDetails">Enquiry Forms</span> <span id="lblStagesCount"></span>
+						</div>
+						
+						<div class="card-right">
+
+							<input type="button" id="btnShowModal" value="Stage Details" class="Button">
+						
+						</div>
+						
+						
+					</div>
+
+					<div class="card-body">
+
+							<div data-role="popup" id="myPopup" class="ui-content">
+
+								<div id="overlay" class="web_dialog_overlay"></div>
+								
+								<div id="dialog" class="web_dialog">
+								
+									<div class="card">
+										<div class="card-heading">
+											
+											<div class="card-title">
+												<span> Stage Details </span>
+											</div>
+											
+											<div class="card-right">
+												<span href="#" id="btnClose" class="close">x</span>
+											</div>
+											
+										</div>
+									
+										<div class="card-body">
+											<div class="table-responsive">
+											
+												<table class="tablesorter-blue" width="100%">
+														<thead>
+															<tr>
+																<th class="tdCenter">S.No</th>
+																<th class="tdCenter">Stage Name</th>
+																<th class="tdCenter">Evaluation Opening Date &amp; Time</th>
+																<th class="tdCenter">Evaluation Dependencies</th>
+																
+															</tr>
+														</thead>
+														<tbody>
+					 
+															
+																<tr>
+																	<td class="tdCenter">1</td>
+																	<td class="tdCenter">PQ Stage</td>
+																	<td class="tdCenter">
+																					     16/06/2026 04:00 PM
+																						 </td>
+																	<td class="tdCenter"></td>
+																	
+																</tr>
+															
+																<tr>
+																	<td class="tdCenter">2</td>
+																	<td class="tdCenter">Commercial Stage</td>
+																	<td class="tdCenter">
+																					     17/06/2026 04:00 PM
+																						 </td>
+																	<td class="tdCenter">PQ Stage</td>
+																	
+																</tr>
+															
+														</tbody>
+													</table>
+												
+											</div>
+										</div>
+									</div>
+							
+							</div>
+
+							<div id="getStageFormDetailsHidden">
+
+								<table width="100%" border="0" class="tablesorter-blue">
+									<thead>
+										<tr>
+											<th class="tdCenter">Stage</th>
+											<th class="tdCenter">Form Name</th>
+											<th class="tdCenter">Type of Form</th>
+											
+											<th class="tdCenter">Supporting Document Required</th>
+											<th class="tdCenter">Supporting Document Description</th>
+											
+												<th class="tdCenter" width="10%">View Details</th>
+											
+											
+										</tr>
+									</thead>
+									<tbody>
+
+										
+											<tr>
+												<td class="tdCenter">PQ Stage</td>
+												<td class="tdCenter">Key Critical Equipment</td>
+												<td class="tdCenter">Standard</td>
+												
+												
+												
+													
+														<td class="tdCenter">No</td>
+														<td class="tdCenter">N/A</td>
+													
+													
+												
+												<td class="tdCenter">
+
+														<a href="#" onclick="viewstageforms('814395','viewKeyEquipments.html','1169792', '2','1779914','Key Critical Equipment')">
+															<img style="border: none;" src="/./resources/img/search.svg">
+														</a>
+													 </td>
+
+											</tr>
+										
+											<tr>
+												<td class="tdCenter">PQ Stage</td>
+												<td class="tdCenter">Previously Executed works</td>
+												<td class="tdCenter">Standard</td>
+												
+												
+												
+													
+														<td class="tdCenter">No</td>
+														<td class="tdCenter">N/A</td>
+													
+													
+												
+												<td class="tdCenter">
+
+														<a href="#" onclick="viewstageforms('814395','viewPreviouslyExecutedworks.html','1169792', '3','1779915','Previously Executed works')">
+															<img style="border: none;" src="/./resources/img/search.svg">
+														</a>
+													 </td>
+
+											</tr>
+										
+											<tr>
+												<td class="tdCenter">PQ Stage</td>
+												<td class="tdCenter">Work Done as a Prime Contractor</td>
+												<td class="tdCenter">Standard</td>
+												
+												
+												
+													
+														<td class="tdCenter">No</td>
+														<td class="tdCenter">N/A</td>
+													
+													
+												
+												<td class="tdCenter">
+
+														<a href="#" onclick="viewstageforms('814395','viewWorkDoneasaPrimeContractor.html','1169792', '20','1779916','Work Done as a Prime Contractor')">
+															<img style="border: none;" src="/./resources/img/search.svg">
+														</a>
+													 </td>
+
+											</tr>
+										
+											<tr>
+												<td class="tdCenter">PQ Stage</td>
+												<td class="tdCenter">Key Personnel</td>
+												<td class="tdCenter">Standard</td>
+												
+												
+												
+													
+														<td class="tdCenter">No</td>
+														<td class="tdCenter">N/A</td>
+													
+													
+												
+												<td class="tdCenter">
+
+														<a href="#" onclick="viewstageforms('814395','viewKeyPersonnel.html','1169792', '22','1779917','Key Personnel')">
+															<img style="border: none;" src="/./resources/img/search.svg">
+														</a>
+													 </td>
+
+											</tr>
+										
+											<tr>
+												<td class="tdCenter">PQ Stage</td>
+												<td class="tdCenter">Works On Hand/Tendered Details</td>
+												<td class="tdCenter">Standard</td>
+												
+												
+												
+													
+														<td class="tdCenter">No</td>
+														<td class="tdCenter">N/A</td>
+													
+													
+												
+												<td class="tdCenter">
+
+														<a href="#" onclick="viewstageforms('814395','viewBidWorkOnHand.html','1169792', '86','1779918','Works On Hand/Tendered Details')">
+															<img style="border: none;" src="/./resources/img/search.svg">
+														</a>
+													 </td>
+
+											</tr>
+										
+											<tr>
+												<td class="tdCenter">PQ Stage</td>
+												<td class="tdCenter">Similar Work Details</td>
+												<td class="tdCenter">Standard</td>
+												
+												
+												
+													
+														<td class="tdCenter">No</td>
+														<td class="tdCenter">N/A</td>
+													
+													
+												
+												<td class="tdCenter">
+
+														<a href="#" onclick="viewstageforms('814395','viewSimilarWorkDetails.html','1169792', '38','1779919','Similar Work Details')">
+															<img style="border: none;" src="/./resources/img/search.svg">
+														</a>
+													 </td>
+
+											</tr>
+										
+											<tr>
+												<td class="tdCenter">PQ Stage</td>
+												<td class="tdCenter">Eligibility Criteria</td>
+												<td class="tdCenter">Standard</td>
+												
+												
+												
+													
+														<td class="tdCenter">No</td>
+														<td class="tdCenter">N/A</td>
+													
+													
+												
+												<td class="tdCenter">
+
+														<a href="#" onclick="viewstageforms('814395','ViewEligibilityCriteria.html','1169792', '84','1779920','Eligibility Criteria')">
+															<img style="border: none;" src="/./resources/img/search.svg">
+														</a>
+													 </td>
+
+											</tr>
+										
+											<tr>
+												<td class="tdCenter">Commercial Stage</td>
+												<td class="tdCenter">Percentage Wise Rate</td>
+												<td class="tdCenter">Secure</td>
+												
+												
+												
+													
+														<td class="tdCenter">No</td>
+														<td class="tdCenter">N/A</td>
+													
+													
+												
+												<td class="tdCenter">
+
+														<a href="#" onclick="viewstageforms('814395','viewSubmitPriceBidWorks.html','1169793', '6','1779921','Percentage Wise Rate')">
+															<img style="border: none;" src="/./resources/img/search.svg">
+														</a>
+													 </td>
+
+											</tr>
+										
+									</tbody>
+								</table>
+
+							</div>
+
+						</div>
+
+					</div>
+				</div>
+
+			</div>
+		
+
+		
+
+		<!--Enquiry Forms  END-->
+
+		<!-- Training Kit Start -->
+		
+		<!-- Training Kit END -->
+
+
+		<!-- Start Links -->
+
+		<div class="btnBox">
+			
+			
+				<input type="button" align="middle" value="Close" class="Button" onclick="window.close()">
+			
+			
+		</div>
+
+
+			
+		</div>
+	</div>
+</div>
+
+
+		<input type="hidden" name="hdnProcurementID" value="814395">
+		<input type="hidden" name="hdnIndentID" value="815715">
+		<input type="hidden" name="hdnTenderCategory" value="101">
+		<input type="hidden" name="hdnPreviousPage" value="TenderDetailsHome.html">
+		<input type="hidden" name="hdnScheduleID" id="hdnScheduleID">
+		<input type="hidden" name="hdnScheduleName" id="hdnScheduleName" value="">
+		<input type="hidden" name="hdnredirect" value="">
+		<input type="hidden" name="hdnType" id="hdnType" value="current">
+
+		<input type="hidden" name="hdnStageID" id="hdnStageID">
+		<input type="hidden" name="nTenderFormID" id="nTenderFormID">
+		<input type="hidden" name="hdnFormID" id="hdnFormID">
+		<input type="hidden" name="hdnPreviousPge" id="hdnPreviousPge" value="TenderDetailsHome.html">
+		<input type="hidden" name="hdnImmediatePreviousPage" id="hdnImmediatePreviousPage" value="TenderDetailsHome.html">
+		<input type="hidden" name="popUPRequestParameter" value="">
+		<input type="hidden" name="hdnCorrigendum" value="fromnit">
+		<input type="hidden" name="hdnFormName" id="hdnFormName">
+
+
+
+	<div>
+<input type="hidden" name="CSRFToken" value="914de90e-22de-49ea-a713-5beb26e5bcf8">
+<input type="hidden" name="hdnEncryptNames" value="hdnEncryptNames">
+<input type="hidden" name="hdnEncryptValues" value="hdnEncryptValues">
+</div></form>
+	
+	
+         
+    
+
+
+
+<script src="/resources/js/moment.js"></script>
+<script src="/resources/js/bootstrap-datetimepicker.min.js"></script>
+<script type="text/javascript" src="/resources/js/tempshape.js"></script>
+<link rel="stylesheet" href="/resources/css/bootstrap-datetimepicker.min.css">
+<script>
+window.history.forward(-1);
+window.location.hash="";
+window.location.hash="Again-No-back-button";//again because google chrome don't insert first hash into history
+window.onhashchange=function(){window.location.hash="";}
+
+
+ window.onload = function () {
+        noBack();
+    }
+    window.history.forward();
+    function noBack() {
+        window.history.forward();
+    }
+   
+</script> 
+
+  
+<div class="bottomFooter">
+
+             
+			Server Time: 06/06/2026 09:31:36 PM &nbsp; &nbsp;
+        
+</div>
+
+<!-- Copyrights Starts Here -->
+
+<!-- Copyrights Ends Here --> 
+
+
+
+<!-- <script type="text/javascript" src="views/jsFiles/temp.test.js"></script> 
+<script type="text/javascript" src="views/jsFiles/tempTest.js"></script>
+<script type="text/javascript" src="views/jsFiles/temp.js"></script>
+<script type="text/javascript" src="views/jsFiles/genTemp.js?ver=20172305"></script>
+ -->
+
+	<script type="text/javascript" src="./resources/js/temp.test.js"></script>
+	<script type="text/javascript" src="./resources/js/tempTest.js"></script>
+	<script type="text/javascript" src="./resources/js/temp.js"></script>
+	<script type="text/javascript" src="./resources/js/genTemp.js?ver=20172305"></script>
+
+
+    
+         
+		           
+				 
+				   <script src="/resources/js/emsigner.js?ver=15042020"></script>
+					
+					
+<script src="/resources/js/grayCSS.js"></script>					
+
+
+
+
+</body></html>
