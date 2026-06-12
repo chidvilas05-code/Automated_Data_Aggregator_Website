@@ -2537,8 +2537,28 @@ def run_scraper_cycle():
 
     print("\n=== AP eProcurement Scraper Cycle ===")
 
+    # Check if database has existing tenders to decide between full or incremental scrape
+    conn = sqlite3.connect(db_path, timeout=120)
+    cursor = conn.cursor()
+    cursor.execute(f"PRAGMA busy_timeout={SQLITE_BUSY_TIMEOUT_MS};")
+    try:
+        cursor.execute("SELECT COUNT(*) FROM tenders")
+        tender_count = cursor.fetchone()[0]
+    except Exception:
+        tender_count = 0
+    finally:
+        conn.close()
+
+    if tender_count == 0:
+        print("[SYSTEM] Database is empty. Scraping all pages for initial data load...")
+        max_pages = None
+    else:
+        # Enforce MAX_PAGES (default to 5 pages if not specified)
+        max_pages = MAX_PAGES if MAX_PAGES > 0 else 5
+        print(f"[SYSTEM] Database has {tender_count} records. Scraping first {max_pages} pages for fast update...")
+
     # phase 1
-    scraped = scrape_tenders(max_pages=MAX_PAGES if MAX_PAGES > 0 else None)
+    scraped = scrape_tenders(max_pages=max_pages)
 
     if scraped:
         sync_phase1_tenders(db_path, scraped)
