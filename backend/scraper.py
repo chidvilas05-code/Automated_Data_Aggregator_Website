@@ -35,6 +35,7 @@ DB_WRITE_GAP_SECONDS = float(os.environ.get("DB_WRITE_GAP_SECONDS", "2"))
 DB_WRITE_RETRIES = int(os.environ.get("DB_WRITE_RETRIES", "8"))
 DB_WORKER_START_GAP_SECONDS = float(os.environ.get("DB_WORKER_START_GAP_SECONDS", "3"))
 SCRAPER_TEST_LIMIT = int(os.environ.get("SCRAPER_TEST_LIMIT", "0"))
+MAX_PAGES = int(os.environ.get("MAX_PAGES", "0"))
 
 
 # =========================================================
@@ -2537,7 +2538,7 @@ def run_scraper_cycle():
     print("\n=== AP eProcurement Scraper Cycle ===")
 
     # phase 1
-    scraped = scrape_tenders()
+    scraped = scrape_tenders(max_pages=MAX_PAGES if MAX_PAGES > 0 else None)
 
     if scraped:
         sync_phase1_tenders(db_path, scraped)
