@@ -1163,7 +1163,7 @@ export default function App() {
       <div className="min-h-screen bg-slate-100 flex flex-col justify-center items-center p-4">
         <div className="max-w-md w-full bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
           <div className="bg-slate-900 p-6 text-center">
-            <svg className="w-12 h-12 text-blue-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
+            <img src="/logo.jpg" alt="Tenders Ravi Logo" className="w-20 h-20 rounded-full mx-auto mb-3 object-cover border-2 border-blue-400 shadow-lg" />
             <h2 className="text-2xl font-bold text-white">AP Tender Hub</h2>
             <p className="text-slate-400 text-sm mt-1">
               {authMode === 'login' ? 'Sign in to your account' : authMode === 'signup' ? 'Create a new account' : 'Reset your password'}
@@ -2164,7 +2164,7 @@ export default function App() {
       {/* Sidebar */}
       <div className="w-64 bg-slate-900 text-white flex flex-col shrink-0">
         <div className="p-6 flex items-center gap-3 border-b border-slate-700">
-          <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
+          <img src="/logo.jpg" alt="Tenders Ravi Logo" className="w-8 h-8 rounded-full object-cover border border-blue-400 shadow-sm" />
           <h1 className="text-xl font-bold tracking-wide">AP Tender Hub</h1>
         </div>
         
