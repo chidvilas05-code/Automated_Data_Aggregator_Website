@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">AP Tender Hub</string>
+    <string name="title_activity_main">AP Tender Hub</string>
+    <string name="package_name">com.tendersravi.tenderhub</string>
+    <string name="custom_url_scheme">com.tendersravi.tenderhub</string>
+</resources>

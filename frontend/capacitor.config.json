@@ -1,0 +1,6 @@
+{
+  "appId": "com.tendersravi.tenderhub",
+  "appName": "AP Tender Hub",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}

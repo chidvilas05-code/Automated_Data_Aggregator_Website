@@ -671,7 +671,6 @@ export default function App() {
   
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const [installPrompt, setInstallPrompt] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
   const [notifiedTenders, setNotifiedTenders] = useState(() => {
@@ -833,35 +832,6 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('theme', theme);
   }, [theme]);
-
-  // --- PWA INSTALL PROMPT ---
-  useEffect(() => {
-    const handleBeforeInstallPrompt = (e) => {
-      e.preventDefault();
-      setInstallPrompt(e);
-    };
-
-    const handleAppInstalled = () => {
-      console.log('PWA was installed');
-      setInstallPrompt(null);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('appinstalled', handleAppInstalled);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('appinstalled', handleAppInstalled);
-    };
-  }, []);
-
-  const handleInstallClick = async () => {
-    if (!installPrompt) return;
-    installPrompt.prompt();
-    const { outcome } = await installPrompt.userChoice;
-    console.log(`User response to the install prompt: ${outcome}`);
-    setInstallPrompt(null);
-  };
 
   const toggleNotification = (tenderId) => {
     setNotifiedTenders(prev => 
@@ -1465,22 +1435,6 @@ export default function App() {
           <span>Dashboard</span>
         </a>
       </nav>
-
-      {/* PWA Install Button */}
-      {installPrompt && (
-        <div className="p-4 border-t border-slate-700/80">
-          <button
-            onClick={handleInstallClick}
-            className="w-full flex items-center justify-center gap-2 p-3 bg-emerald-600 hover:bg-emerald-700 rounded-lg text-white font-bold transition-all shadow-md active:scale-95"
-            aria-label="Install AP Tender Hub App"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-            <span>Install App</span>
-          </button>
-        </div>
-      )}
     </>
   );
 
