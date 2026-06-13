@@ -2325,113 +2325,124 @@ def chunk_list(values, chunk_count):
 def process_deep_scraping(db_path, worker_count=DEEP_SCRAPE_WORKERS):
     print(f"\n[{datetime.now().strftime('%H:%M:%S')}] PHASE 2 QUEUE START")
 
-    conn = sqlite3.connect(db_path, timeout=120)
-    cursor = conn.cursor()
-    cursor.execute(f"PRAGMA busy_timeout={SQLITE_BUSY_TIMEOUT_MS};")
+    max_loops = 5
+    loop_count = 0
+    previous_pending_count = 999999
 
-    cursor.execute(
-        """
-        SELECT tender_id, tender_category, est_value
-        FROM tenders
-        WHERE COALESCE(is_active, 1)=1
-          AND (
-              tender_details IS NULL
-              OR tender_details=''
-              OR tender_details='Pending Deep Extraction'
-              OR tender_details='Data Not Found'
-              OR enquiry_form_details IS NULL
-              OR enquiry_form_details=''
-              OR boq_link IS NULL
-              OR boq_link=''
-              OR document_link IS NULL
-              OR document_link=''
-              OR eligibility_criteria IS NULL
-              OR eligibility_criteria=''
-              OR eligibility_criteria='Pending Eligibility Extraction'
-          )
-        ORDER BY scraped_at DESC
-        """
-    )
-    primary_rows = cursor.fetchall()
+    while loop_count < max_loops:
+        loop_count += 1
 
-    cursor.execute(
-        """
-        SELECT tender_id, tender_category, est_value
-        FROM tenders
-        WHERE COALESCE(is_active, 1)=1
-          AND document_files LIKE '%"error"%'
-        ORDER BY scraped_at DESC
-        """
-    )
-    failed_document_rows = cursor.fetchall()
-    conn.close()
+        conn = sqlite3.connect(db_path, timeout=120)
+        cursor = conn.cursor()
+        cursor.execute(f"PRAGMA busy_timeout={SQLITE_BUSY_TIMEOUT_MS};")
 
-    if SCRAPER_TEST_LIMIT > 0:
-        primary_rows = [
-            row for row in primary_rows
-            if is_works_over_50_lakhs(row[1], row[2])
-        ]
-        failed_document_rows = [
-            row for row in failed_document_rows
-            if is_works_over_50_lakhs(row[1], row[2])
-        ]
-        print("[SYSTEM] Test mode: only Works tenders above 50 lakhs are queued")
-
-    primary_tender_ids = [row[0] for row in primary_rows]
-    failed_document_ids = [row[0] for row in failed_document_rows]
-
-    pending_tender_ids = []
-    seen = set()
-
-    for tender_id in primary_tender_ids + failed_document_ids:
-        if tender_id not in seen:
-            seen.add(tender_id)
-            pending_tender_ids.append(tender_id)
-
-    if not pending_tender_ids:
-        print("[SUCCESS] Nothing pending")
-        return
-
-    if SCRAPER_TEST_LIMIT > 0:
-        pending_tender_ids = pending_tender_ids[:SCRAPER_TEST_LIMIT]
-        print(f"[SYSTEM] SCRAPER_TEST_LIMIT active: checking first {len(pending_tender_ids)} tenders")
-
-    print(
-        "[SYSTEM] Phase 2 queue:",
-        f"primary={len(primary_tender_ids)}",
-        f"failed_document_retry_last={len(failed_document_ids)}",
-        f"unique={len(pending_tender_ids)}"
-    )
-
-    worker_count = max(1, min(worker_count, len(pending_tender_ids)))
-
-    if worker_count == 1:
-        download_dir = os.path.join(os.path.dirname(db_path), "downloads", "W1")
-        process_deep_scraping_batch(db_path, pending_tender_ids, "W1", download_dir)
-        return
-
-    print(f"[SYSTEM] Processing {len(pending_tender_ids)} tenders with {worker_count} workers")
-
-    processes = []
-
-    for idx, chunk in enumerate(chunk_list(pending_tender_ids, worker_count), start=1):
-        download_dir = os.path.join(os.path.dirname(db_path), "downloads", f"W{idx}")
-        process = multiprocessing.Process(
-            target=process_deep_scraping_batch,
-            args=(db_path, chunk, f"W{idx}", download_dir)
+        cursor.execute(
+            """
+            SELECT tender_id, tender_category, est_value
+            FROM tenders
+            WHERE COALESCE(is_active, 1)=1
+              AND (
+                  tender_details IS NULL
+                  OR tender_details=''
+                  OR tender_details='Pending Deep Extraction'
+                  OR tender_details='Data Not Found'
+                  OR enquiry_form_details IS NULL
+                  OR enquiry_form_details=''
+                  OR boq_link IS NULL
+                  OR boq_link=''
+                  OR document_link IS NULL
+                  OR document_link=''
+                  OR eligibility_criteria IS NULL
+                  OR eligibility_criteria=''
+                  OR eligibility_criteria='Pending Eligibility Extraction'
+              )
+            ORDER BY scraped_at DESC
+            """
         )
-        process.start()
-        processes.append(process)
+        primary_rows = cursor.fetchall()
 
-        if DB_WORKER_START_GAP_SECONDS:
-            print(f"[SYSTEM] Waiting {DB_WORKER_START_GAP_SECONDS:.1f}s before starting next worker")
-            time.sleep(DB_WORKER_START_GAP_SECONDS)
+        cursor.execute(
+            """
+            SELECT tender_id, tender_category, est_value
+            FROM tenders
+            WHERE COALESCE(is_active, 1)=1
+              AND document_files LIKE '%"error"%'
+            ORDER BY scraped_at DESC
+            """
+        )
+        failed_document_rows = cursor.fetchall()
+        conn.close()
 
-    for process in processes:
-        process.join()
+        if SCRAPER_TEST_LIMIT > 0:
+            primary_rows = [
+                row for row in primary_rows
+                if is_works_over_50_lakhs(row[1], row[2])
+            ]
+            failed_document_rows = [
+                row for row in failed_document_rows
+                if is_works_over_50_lakhs(row[1], row[2])
+            ]
 
-        if process.exitcode != 0:
-            print(f"[WARNING] Worker exited with code {process.exitcode}")
+        primary_tender_ids = [row[0] for row in primary_rows]
+        failed_document_ids = [row[0] for row in failed_document_rows]
+
+        pending_tender_ids = []
+        seen = set()
+
+        for tender_id in primary_tender_ids + failed_document_ids:
+            if tender_id not in seen:
+                seen.add(tender_id)
+                pending_tender_ids.append(tender_id)
+
+        if not pending_tender_ids:
+            print(f"[SUCCESS] All pending tenders fully scraped after loop {loop_count - 1}!")
+            break
+
+        if SCRAPER_TEST_LIMIT > 0:
+            pending_tender_ids = pending_tender_ids[:SCRAPER_TEST_LIMIT]
+
+        current_pending_count = len(pending_tender_ids)
+        print(f"\n[LOOP {loop_count}/{max_loops}] Remaining pending tenders to scrape: {current_pending_count}")
+
+        # If we didn't make any progress in the last loop run, stop to prevent infinite loops on dead links
+        if current_pending_count >= previous_pending_count and loop_count > 2:
+            print(f"[SYSTEM] No progress made in the last run (still {current_pending_count} pending). Stopping loop to prevent infinite retry of dead links.")
+            break
+
+        previous_pending_count = current_pending_count
+
+        current_workers = max(1, min(worker_count, len(pending_tender_ids)))
+
+        if current_workers == 1:
+            download_dir = os.path.join(os.path.dirname(db_path), "downloads", "W1")
+            process_deep_scraping_batch(db_path, pending_tender_ids, "W1", download_dir)
+        else:
+            print(f"[SYSTEM] Processing {len(pending_tender_ids)} tenders with {current_workers} workers")
+            processes = []
+
+            for idx, chunk in enumerate(chunk_list(pending_tender_ids, current_workers), start=1):
+                download_dir = os.path.join(os.path.dirname(db_path), "downloads", f"W{idx}")
+                process = multiprocessing.Process(
+                    target=process_deep_scraping_batch,
+                    args=(db_path, chunk, f"W{idx}", download_dir)
+                )
+                process.start()
+                processes.append(process)
+
+                if DB_WORKER_START_GAP_SECONDS:
+                    print(f"[SYSTEM] Waiting {DB_WORKER_START_GAP_SECONDS:.1f}s before starting next worker")
+                    time.sleep(DB_WORKER_START_GAP_SECONDS)
+
+            for process in processes:
+                process.join()
+
+                if process.exitcode != 0:
+                    print(f"[WARNING] Worker exited with code {process.exitcode}")
+
+        # Give the portal firewall a 5-second breathing room before retrying remaining failed ones
+        if len(pending_tender_ids) > 0:
+            time.sleep(5)
+
 
 
 def cleanup_completed_tenders(db_path):
