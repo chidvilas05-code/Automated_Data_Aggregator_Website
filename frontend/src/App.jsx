@@ -670,6 +670,8 @@ export default function App() {
   const [selectedFormDetail, setSelectedFormDetail] = useState(null);
   
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState(null);
   const [notifiedTenders, setNotifiedTenders] = useState(() => {
     const saved = localStorage.getItem('markedTenders');
     return saved ? JSON.parse(saved) : [];
@@ -829,6 +831,35 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('theme', theme);
   }, [theme]);
+
+  // --- PWA INSTALL PROMPT ---
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+
+    const handleAppInstalled = () => {
+      console.log('PWA was installed');
+      setInstallPrompt(null);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    console.log(`User response to the install prompt: ${outcome}`);
+    setInstallPrompt(null);
+  };
 
   const toggleNotification = (tenderId) => {
     setNotifiedTenders(prev => 
@@ -1362,6 +1393,61 @@ export default function App() {
       </button>
     );
   };
+
+  const renderSidebarContents = () => (
+    <>
+      <div className="p-6 flex items-center justify-between border-b border-slate-700">
+        <div className="flex items-center gap-3">
+          <img src="/logo.jpg" alt="Tenders Ravi Logo" className="w-8 h-8 rounded-full object-cover border border-blue-400 shadow-sm" />
+          <h1 className="text-xl font-bold tracking-wide">AP Tender Hub</h1>
+        </div>
+        {/* Close button inside mobile sidebar */}
+        <button
+          onClick={() => setIsMobileSidebarOpen(false)}
+          className="lg:hidden p-1 hover:bg-slate-800 rounded text-slate-400 hover:text-white"
+          aria-label="Close menu"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      
+      {/* User Profile Area */}
+      <div className="px-6 py-4 bg-slate-800/50">
+        <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Logged in as</p>
+        <div className="flex justify-between items-center">
+          <p className="font-bold text-white truncate pr-2">@{currentUser.username}</p>
+          <button onClick={handleLogout} className="text-xs text-slate-300 hover:text-white bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded transition-colors">
+            Logout
+          </button>
+        </div>
+      </div>
+
+      <nav className="flex-1 p-4 space-y-2 mt-2">
+        <a href="#" className="flex items-center gap-3 p-3 bg-blue-600 rounded-lg text-white font-medium transition-colors">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+          <span>Dashboard</span>
+        </a>
+      </nav>
+
+      {/* PWA Install Button */}
+      {installPrompt && (
+        <div className="p-4 border-t border-slate-700/80">
+          <button
+            onClick={handleInstallClick}
+            className="w-full flex items-center justify-center gap-2 p-3 bg-emerald-600 hover:bg-emerald-700 rounded-lg text-white font-bold transition-all shadow-md active:scale-95"
+            aria-label="Install AP Tender Hub App"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            <span>Install App</span>
+          </button>
+        </div>
+      )}
+    </>
+  );
 
   return (
     <div className={`flex h-screen font-sans overflow-hidden relative ${theme === 'dark' ? 'dark-theme bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-800'}`}>
@@ -2163,92 +2249,110 @@ export default function App() {
       </div>
       {/* --------------------------------------- */}
 
-      {/* Sidebar */}
-      <div className="w-64 bg-slate-900 text-white flex flex-col shrink-0">
-        <div className="p-6 flex items-center gap-3 border-b border-slate-700">
-          <img src="/logo.jpg" alt="Tenders Ravi Logo" className="w-8 h-8 rounded-full object-cover border border-blue-400 shadow-sm" />
-          <h1 className="text-xl font-bold tracking-wide">AP Tender Hub</h1>
-        </div>
-        
-        {/* User Profile Area */}
-        <div className="px-6 py-4 bg-slate-800/50">
-          <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Logged in as</p>
-          <div className="flex justify-between items-center">
-            <p className="font-bold text-white truncate pr-2">@{currentUser.username}</p>
-            <button onClick={handleLogout} className="text-xs text-slate-300 hover:text-white bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded transition-colors">
-              Logout
-            </button>
-          </div>
-        </div>
+      {/* Mobile Sidebar */}
+      {isMobileSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-slate-900/50 z-40 lg:hidden backdrop-blur-sm transition-opacity"
+          onClick={() => setIsMobileSidebarOpen(false)}
+        ></div>
+      )}
+      <div className={`fixed inset-y-0 left-0 w-64 bg-slate-900 text-white z-50 transform transition-transform duration-300 ease-in-out flex flex-col lg:hidden ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        {renderSidebarContents()}
+      </div>
 
-        <nav className="flex-1 p-4 space-y-2 mt-2">
-          <a href="#" className="flex items-center gap-3 p-3 bg-blue-600 rounded-lg text-white font-medium transition-colors">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-            <span>Dashboard</span>
-          </a>
-        </nav>
+      {/* Desktop Sidebar (hidden on mobile, visible on lg screens) */}
+      <div className="hidden lg:flex w-64 bg-slate-900 text-white flex-col shrink-0">
+        {renderSidebarContents()}
       </div>
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="bg-white border-b border-slate-200 px-8 py-5 flex justify-between items-center shrink-0">
-          <div>
-            <h2 className="text-2xl font-bold text-slate-800">Tender Overview</h2>
-            <p className="text-sm text-slate-500 mt-1 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-              Live AP eProcurement Data
-            </p>
-          </div>
-          <div className="flex items-center gap-6">
-            
-            {/* The Google Translate Widget Container */}
-            <div id="google_translate_element"></div>
-            
-            <button
-              type="button"
-              onClick={() => setTheme(prev => prev === 'dark' ? 'light' : 'dark')}
-              className="inline-flex items-center gap-2 px-3 py-2 border border-slate-300 rounded-lg text-sm font-bold text-slate-700 bg-white hover:bg-slate-50 transition-colors shadow-sm"
-              title={theme === 'dark' ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {theme === 'dark' ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 1012 21a8.972 8.972 0 008.354-5.646z" />
+        <header className="bg-white border-b border-slate-200 px-4 md:px-8 py-4 flex flex-col gap-4 lg:flex-row lg:justify-between lg:items-center shrink-0">
+          <div className="flex items-center justify-between w-full lg:w-auto">
+            <div className="flex items-center gap-3">
+              {/* Hamburger menu button visible only on lg:hidden */}
+              <button
+                onClick={() => setIsMobileSidebarOpen(true)}
+                className="lg:hidden p-2 hover:bg-slate-100 rounded-lg text-slate-600 transition-colors"
+                aria-label="Open menu"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+              <div>
+                <h2 className="text-xl md:text-2xl font-bold text-slate-800">Tender Overview</h2>
+                <p className="text-xs md:text-sm text-slate-500 mt-0.5 flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                  Live AP eProcurement Data
+                </p>
+              </div>
+            </div>
+            {/* Small Screen Action Shortcut */}
+            <div className="flex items-center gap-2 lg:hidden">
+              {/* Notification Bell */}
+              <button 
+                onClick={() => setIsNotificationOpen(true)}
+                className="relative p-2 bg-white border border-slate-200 rounded-full text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors shadow-sm"
+                aria-label="View Marked Tenders"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                {notifiedTenders.length > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border border-white shadow-sm">
+                    {notifiedTenders.length}
+                  </span>
                 )}
-              </svg>
-              {theme === 'dark' ? 'Light' : 'Dark'}
-            </button>
+              </button>
+            </div>
+          </div>
 
-            <select
-              value={searchField}
-              onChange={(e) => setSearchField(e.target.value)}
-              className="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white text-slate-700"
-              title="Choose search field"
-            >
-              <option value="all">All Fields</option>
-              <option value="title">Name of Work</option>
-              <option value="tender_id">Tender ID</option>
-              <option value="tender_notice_number">Notice Number</option>
-              <option value="department">Department</option>
-            </select>
+          {/* Search & Actions Bar */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
+            <div id="google_translate_element" className="hidden lg:block"></div>
+            
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              {/* Search Type selector */}
+              <select
+                value={searchField}
+                onChange={(e) => setSearchField(e.target.value)}
+                className="flex-1 sm:flex-none px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white text-slate-700 outline-none"
+                title="Choose search field"
+              >
+                <option value="all">All Fields</option>
+                <option value="title">Name of Work</option>
+                <option value="tender_id">Tender ID</option>
+                <option value="tender_notice_number">Notice Number</option>
+                <option value="department">Department</option>
+              </select>
 
-            <div className="relative">
+              {/* Theme Toggle */}
+              <button
+                type="button"
+                onClick={() => setTheme(prev => prev === 'dark' ? 'light' : 'dark')}
+                className="px-3 py-2 border border-slate-300 rounded-lg text-sm font-bold text-slate-700 bg-white hover:bg-slate-50 transition-colors shadow-sm"
+                title={theme === 'dark' ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
+              >
+                {theme === 'dark' ? 'Light' : 'Dark'}
+              </button>
+            </div>
+
+            {/* Search Input */}
+            <div className="relative w-full sm:w-64 md:w-80">
               <svg className="w-5 h-5 absolute left-3 top-2.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
               <input 
                 type="text" 
                 placeholder={searchField === 'title' ? 'Search by Name of Work...' : 'Search by ID, Name of Work, Notice No...'}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-80"
+                className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
 
-            {/* Notification Bell Toggle */}
+            {/* Desktop Notification Bell */}
             <button 
               onClick={() => setIsNotificationOpen(true)}
-              className="relative p-2.5 bg-white border border-slate-200 rounded-full text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+              className="hidden lg:relative lg:block p-2.5 bg-white border border-slate-200 rounded-full text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
               title="View Marked Tenders"
               aria-label="View Marked Tenders"
             >
@@ -2259,12 +2363,11 @@ export default function App() {
                 </span>
               )}
             </button>
-            
           </div>
         </header>
 
         {/* Dashboard Content */}
-        <main className="flex-1 overflow-y-auto p-8">
+        <main className="flex-1 overflow-y-auto p-4 md:p-8">
           
           {/* Priority District Tabs */}
           {currentUser.districts && (
