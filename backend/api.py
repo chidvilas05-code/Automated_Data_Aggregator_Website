@@ -27,12 +27,23 @@ app.add_middleware(
 class UserSignup(BaseModel):
     username: str
     password: str
+    phone: str
     districts: List[str]
 
 
 class UserLogin(BaseModel):
     username: str
     password: str
+
+
+class UserForgotVerify(BaseModel):
+    username: str
+    phone: str
+
+
+class UserForgotReset(BaseModel):
+    username: str
+    newPassword: str
 
 
 # --- Database Helper ---
@@ -54,10 +65,17 @@ def init_db():
         CREATE TABLE IF NOT EXISTS users (
             username TEXT PRIMARY KEY,
             password TEXT,
+            phone TEXT,
             districts TEXT
         )
         """
     )
+
+    # Check if phone column needs to be added (for backward compatibility if table existed)
+    cursor.execute("PRAGMA table_info(users)")
+    user_columns = {row["name"] for row in cursor.fetchall()}
+    if user_columns and "phone" not in user_columns:
+        cursor.execute("ALTER TABLE users ADD COLUMN phone TEXT")
 
     cursor.execute("PRAGMA table_info(tenders)")
     tender_columns = {row["name"] for row in cursor.fetchall()}
@@ -105,8 +123,8 @@ def signup(user: UserSignup):
 
     districts_json = json.dumps(user.districts)
     cursor.execute(
-        "INSERT INTO users (username, password, districts) VALUES (?, ?, ?)",
-        (user.username, user.password, districts_json),
+        "INSERT INTO users (username, password, phone, districts) VALUES (?, ?, ?, ?)",
+        (user.username, user.password, user.phone, districts_json),
     )
     conn.commit()
     conn.close()
@@ -133,6 +151,42 @@ def login(user: UserLogin):
             },
         }
     raise HTTPException(status_code=401, detail="Invalid username or password")
+
+
+@app.post("/api/forgot/verify")
+def forgot_verify(req: UserForgotVerify):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT phone FROM users WHERE username = ?", (req.username,))
+    row = cursor.fetchone()
+    conn.close()
+
+    if not row:
+        raise HTTPException(status_code=404, detail="Username does not exist")
+
+    if row["phone"] != req.phone:
+        raise HTTPException(status_code=400, detail="Phone number does not match this username")
+
+    return {"status": "success", "message": "Verification successful"}
+
+
+@app.post("/api/forgot/reset")
+def forgot_reset(req: UserForgotReset):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT username FROM users WHERE username = ?", (req.username,))
+    if not cursor.fetchone():
+        conn.close()
+        raise HTTPException(status_code=404, detail="Username does not exist")
+
+    cursor.execute(
+        "UPDATE users SET password = ? WHERE username = ?",
+        (req.newPassword, req.username),
+    )
+    conn.commit()
+    conn.close()
+    return {"status": "success", "message": "Password reset successfully"}
+
 
 
 @app.get("/api/tenders")

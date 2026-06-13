@@ -713,23 +713,31 @@ export default function App() {
   };
 
   // --- AUTHENTICATION HANDLERS ---
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setAuthError('');
-    const users = JSON.parse(localStorage.getItem('users') || '{}');
-    const user = users[loginForm.username];
-    
-    if (user && user.password === loginForm.password) {
-      const sessionUser = { username: loginForm.username, districts: user.districts };
-      setCurrentUser(sessionUser);
-      localStorage.setItem('currentUser', JSON.stringify(sessionUser));
-      setActiveTab(0); // Reset to first district on login
-    } else {
-      setAuthError('Invalid username or password.');
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(loginForm),
+      });
+      const result = await response.json();
+      if (response.ok && result.status === 'success') {
+        const sessionUser = result.data;
+        setCurrentUser(sessionUser);
+        localStorage.setItem('currentUser', JSON.stringify(sessionUser));
+        setActiveTab(0); // Reset to first district on login
+      } else {
+        setAuthError(result.detail || 'Invalid username or password.');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setAuthError('Unable to connect to the authentication server.');
     }
   };
 
-  const handleSignup = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
     setAuthError('');
     
@@ -748,68 +756,92 @@ export default function App() {
       setAuthError('Please select 4 distinct priority districts.');
       return;
     }
-    
-    const users = JSON.parse(localStorage.getItem('users') || '{}');
-    if (users[signupForm.username]) {
-      setAuthError('Username already exists. Please login.');
-      return;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: signupForm.username,
+          password: signupForm.password,
+          phone: signupForm.phone,
+          districts: signupForm.districts,
+        }),
+      });
+      const result = await response.json();
+      if (response.ok && result.status === 'success') {
+        // Auto-login after signup
+        const sessionUser = { username: signupForm.username, districts: signupForm.districts };
+        setCurrentUser(sessionUser);
+        localStorage.setItem('currentUser', JSON.stringify(sessionUser));
+        setActiveTab(0);
+      } else {
+        setAuthError(result.detail || 'Username already exists. Please login.');
+      }
+    } catch (err) {
+      console.error('Signup error:', err);
+      setAuthError('Unable to connect to the authentication server.');
     }
-    
-    // Save new user with phone
-    users[signupForm.username] = { 
-      password: signupForm.password, 
-      districts: signupForm.districts,
-      phone: signupForm.phone
-    };
-    localStorage.setItem('users', JSON.stringify(users));
-    
-    // Auto-login after signup
-    const sessionUser = { username: signupForm.username, districts: signupForm.districts };
-    setCurrentUser(sessionUser);
-    localStorage.setItem('currentUser', JSON.stringify(sessionUser));
-    setActiveTab(0);
   };
 
-  const handleForgotVerify = (e) => {
+  const handleForgotVerify = async (e) => {
     e.preventDefault();
     setAuthError('');
     setAuthSuccess('');
-    const users = JSON.parse(localStorage.getItem('users') || '{}');
-    const user = users[forgotForm.username];
-    
-    if (!user) {
-      setAuthError('Username does not exist.');
-      return;
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/forgot/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: forgotForm.username,
+          phone: forgotForm.phone,
+        }),
+      });
+      const result = await response.json();
+      if (response.ok && result.status === 'success') {
+        setForgotStep(2);
+      } else {
+        setAuthError(result.detail || 'Username or phone verification failed.');
+      }
+    } catch (err) {
+      console.error('Forgot verify error:', err);
+      setAuthError('Unable to connect to the authentication server.');
     }
-    if (user.phone !== forgotForm.phone) {
-      setAuthError('Phone number does not match this username.');
-      return;
-    }
-    setForgotStep(2);
   };
 
-  const handleForgotReset = (e) => {
+  const handleForgotReset = async (e) => {
     e.preventDefault();
     setAuthError('');
     if (forgotForm.newPassword !== forgotForm.confirmPassword) {
       setAuthError('Passwords do not match.');
       return;
     }
-    
-    const users = JSON.parse(localStorage.getItem('users') || '{}');
-    const user = users[forgotForm.username];
-    if (user) {
-      user.password = forgotForm.newPassword;
-      localStorage.setItem('users', JSON.stringify(users));
-      setAuthSuccess('Password reset successful! Please sign in with your new password.');
-      setAuthMode('login');
-      setLoginForm({ username: forgotForm.username, password: '' });
-      setForgotForm({ username: '', phone: '', newPassword: '', confirmPassword: '' });
-      setForgotStep(1);
-    } else {
-      setAuthError('An error occurred. Username not found.');
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/forgot/reset`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: forgotForm.username,
+          newPassword: forgotForm.newPassword,
+        }),
+      });
+      const result = await response.json();
+      if (response.ok && result.status === 'success') {
+        setAuthSuccess('Password reset successful! Please sign in with your new password.');
+        setAuthMode('login');
+        setLoginForm({ username: forgotForm.username, password: '' });
+        setForgotForm({ username: '', phone: '', newPassword: '', confirmPassword: '' });
+        setForgotStep(1);
+      } else {
+        setAuthError(result.detail || 'Password reset failed.');
+      }
+    } catch (err) {
+      console.error('Forgot reset error:', err);
+      setAuthError('Unable to connect to the authentication server.');
     }
   };
+
 
   const handleLogout = () => {
     setCurrentUser(null);
@@ -1188,15 +1220,15 @@ export default function App() {
             {authMode === 'login' && (
               <form onSubmit={handleLogin} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Username</label>
-                  <input type="text" required value={loginForm.username} onChange={e => setLoginForm({...loginForm, username: e.target.value})} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="Enter username" />
+                  <label htmlFor="login-username" className="block text-sm font-medium text-slate-700 mb-1">Username</label>
+                  <input id="login-username" name="username" autoComplete="username" type="text" required value={loginForm.username} onChange={e => setLoginForm({...loginForm, username: e.target.value})} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="Enter username" />
                 </div>
                 <div>
                   <div className="flex justify-between items-center mb-1">
-                    <label className="block text-sm font-medium text-slate-700">Password</label>
+                    <label htmlFor="login-password" className="block text-sm font-medium text-slate-700">Password</label>
                     <button type="button" onClick={() => { setAuthMode('forgot'); setForgotStep(1); setAuthError(''); setAuthSuccess(''); }} className="text-xs text-blue-600 font-medium hover:underline">Forgot password?</button>
                   </div>
-                  <input type="password" required value={loginForm.password} onChange={e => setLoginForm({...loginForm, password: e.target.value})} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="••••••••" />
+                  <input id="login-password" name="password" autoComplete="current-password" type="password" required value={loginForm.password} onChange={e => setLoginForm({...loginForm, password: e.target.value})} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="••••••••" />
                 </div>
                 <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg transition-colors mt-2">Sign In</button>
                 <p className="text-center text-sm text-slate-500 mt-4">
@@ -1207,16 +1239,16 @@ export default function App() {
             {authMode === 'signup' && (
               <form onSubmit={handleSignup} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Username</label>
-                  <input type="text" required value={signupForm.username} onChange={e => setSignupForm({...signupForm, username: e.target.value})} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="Choose a username" />
+                  <label htmlFor="signup-username" className="block text-sm font-medium text-slate-700 mb-1">Username</label>
+                  <input id="signup-username" name="username" autoComplete="username" type="text" required value={signupForm.username} onChange={e => setSignupForm({...signupForm, username: e.target.value})} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="Choose a username" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
-                  <input type="password" required value={signupForm.password} onChange={e => setSignupForm({...signupForm, password: e.target.value})} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="Create a password" />
+                  <label htmlFor="signup-password" className="block text-sm font-medium text-slate-700 mb-1">Password</label>
+                  <input id="signup-password" name="password" autoComplete="new-password" type="password" required value={signupForm.password} onChange={e => setSignupForm({...signupForm, password: e.target.value})} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="Create a password" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Phone Number (Linked for password reset)</label>
-                  <input type="tel" required value={signupForm.phone || ''} onChange={e => setSignupForm({...signupForm, phone: e.target.value})} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="10-digit phone number" pattern="[0-9]{10}" title="Please enter a 10-digit phone number" />
+                  <label htmlFor="signup-phone" className="block text-sm font-medium text-slate-700 mb-1">Phone Number (Linked for password reset)</label>
+                  <input id="signup-phone" name="phone" autoComplete="tel" type="tel" required value={signupForm.phone || ''} onChange={e => setSignupForm({...signupForm, phone: e.target.value})} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="10-digit phone number" pattern="[0-9]{10}" title="Please enter a 10-digit phone number" />
                 </div>
                 
                 <div className="pt-3 border-t border-slate-100">
