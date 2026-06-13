@@ -1489,7 +1489,7 @@ export default function App() {
                        </button>
                      </>
                    )}
-                   <button onClick={closeModal} className="text-slate-400 hover:bg-slate-200 hover:text-slate-700 p-2 rounded-full transition-colors">
+                   <button onClick={closeModal} className="text-slate-400 hover:bg-slate-200 hover:text-slate-700 p-2 rounded-full transition-colors" aria-label="Close modal">
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                    </button>
                  </div>
@@ -1562,6 +1562,7 @@ export default function App() {
                                                   onClick={() => setSelectedFormDetail(formName)}
                                                   className="p-1 rounded-lg hover:bg-violet-50 text-violet-600 transition-colors inline-flex items-center justify-center"
                                                   title={`View details of ${formName}`}
+                                                  aria-label={`View details of ${formName}`}
                                                 >
                                                   <svg className="w-5 h-5 text-blue-600 hover:text-blue-800 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
@@ -2121,7 +2122,7 @@ export default function App() {
             <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"></path></svg>
             <h3 className="font-bold text-slate-800 text-lg"><span>Marked Tenders</span></h3>
           </div>
-          <button onClick={() => setIsNotificationOpen(false)} className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded-full transition-colors">
+          <button onClick={() => setIsNotificationOpen(false)} className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded-full transition-colors" aria-label="Close notifications">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
           </button>
         </div>
@@ -2143,6 +2144,7 @@ export default function App() {
                   onClick={() => toggleNotification(t.tender_id)} 
                   className="absolute top-4 right-4 text-slate-300 hover:text-red-500 transition-colors"
                   title="Remove Notification"
+                  aria-label="Remove Notification"
                 >
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd"></path></svg>
                 </button>
@@ -2248,6 +2250,7 @@ export default function App() {
               onClick={() => setIsNotificationOpen(true)}
               className="relative p-2.5 bg-white border border-slate-200 rounded-full text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
               title="View Marked Tenders"
+              aria-label="View Marked Tenders"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
               {notifiedTenders.length > 0 && (
@@ -2442,6 +2445,7 @@ export default function App() {
                                     : 'bg-white border border-slate-200 text-slate-400 hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50'
                                 }`}
                                 title={isMarked ? "Remove from Notifications" : "Mark for Notification"}
+                                aria-label={isMarked ? "Remove from Notifications" : "Mark for Notification"}
                               >
                                 <svg className="w-4 h-4" fill={isMarked ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
                               </button>
@@ -2451,6 +2455,7 @@ export default function App() {
                                 onClick={() => openModal('details', tender)}
                                 className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-indigo-600 hover:border-indigo-300 hover:bg-indigo-50 transition-all shadow-sm"
                                 title="View Details"
+                                aria-label="View Details"
                               >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                               </button>
@@ -2460,6 +2465,7 @@ export default function App() {
                                 onClick={() => openModal('boq', tender)}
                                 className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-emerald-600 hover:border-emerald-300 hover:bg-emerald-50 transition-all shadow-sm"
                                 title="BOQ Item Details"
+                                aria-label="BOQ Item Details"
                               >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
                               </button>
@@ -2469,6 +2475,7 @@ export default function App() {
                                 onClick={() => openModal('docs', tender)}
                                 className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-amber-600 hover:border-amber-300 hover:bg-amber-50 transition-all shadow-sm"
                                 title="Tender Documents"
+                                aria-label="Tender Documents"
                               >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 9h1M9 13h6M9 17h6" /></svg>
                               </button>
@@ -2478,6 +2485,7 @@ export default function App() {
                                 onClick={() => openModal('eligibility', tender)}
                                 className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-violet-600 hover:border-violet-300 hover:bg-violet-50 transition-all shadow-sm"
                                 title="Eligibility Criteria"
+                                aria-label="Eligibility Criteria"
                               >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4M7 4h10a2 2 0 012 2v14l-7-3-7 3V6a2 2 0 012-2z" /></svg>
                               </button>
