@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 // List of all 26 AP Districts for the Sign Up dropdowns
 const AP_DISTRICTS = [
@@ -672,6 +672,8 @@ export default function App() {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [installPrompt, setInstallPrompt] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(20);
   const [notifiedTenders, setNotifiedTenders] = useState(() => {
     const saved = localStorage.getItem('markedTenders');
     return saved ? JSON.parse(saved) : [];
@@ -1316,60 +1318,85 @@ export default function App() {
   }
 
   // --- DASHBOARD FILTERING LOGIC ---
-  
-  const searchValue = searchTerm.toLowerCase().trim();
 
-  // 1. First, apply the text search filter
-  const searchedTenders = tenders.filter(tender => {
-    if (!searchValue) return true;
+  // Reset pagination when search or tab changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab, searchTerm, searchField, itemsPerPage]);
 
-    const searchableFields = {
-      all: [
-        tender.title,
-        tender.tender_id,
-        tender.tender_notice_number,
-        tender.department,
-        tender.tender_category,
-        tender.est_value
-      ],
-      title: [tender.title],
-      tender_id: [tender.tender_id],
-      tender_notice_number: [tender.tender_notice_number],
-      department: [tender.department]
-    };
+  // 1. Memoize displayTenders to prevent heavy recalculations & sorting on every render
+  const displayTenders = useMemo(() => {
+    const searchValue = searchTerm.toLowerCase().trim();
+    
+    // First, apply text search filter
+    const searched = tenders.filter(tender => {
+      if (!searchValue) return true;
 
-    return (searchableFields[searchField] || searchableFields.all)
-      .some(value => String(value || '').toLowerCase().includes(searchValue));
-  });
+      const searchableFields = {
+        all: [
+          tender.title,
+          tender.tender_id,
+          tender.tender_notice_number,
+          tender.department,
+          tender.tender_category,
+          tender.est_value
+        ],
+        title: [tender.title],
+        tender_id: [tender.tender_id],
+        tender_notice_number: [tender.tender_notice_number],
+        department: [tender.department]
+      };
 
-  // 2. Decide which list to render to the table based on the active tab
-  let displayTenders = [];
-  let tabTitle = "";
+      return (searchableFields[searchField] || searchableFields.all)
+        .some(value => String(value || '').toLowerCase().includes(searchValue));
+    });
 
-  if (activeTab === 'more') {
-    displayTenders = searchedTenders;
-    tabTitle = "All State Tenders";
-  } else {
-    // It's one of the 4 priority districts
-    const currentDistrict = currentUser.districts[activeTab];
-    tabTitle = `${currentDistrict} Tenders`;
-    displayTenders = searchedTenders.filter(tender => 
-      (tender.department && tender.department.toLowerCase().includes(currentDistrict.toLowerCase())) ||
-      (tender.title && tender.title.toLowerCase().includes(currentDistrict.toLowerCase())) ||
-      (tender.tender_notice_number && tender.tender_notice_number.toLowerCase().includes(currentDistrict.toLowerCase()))
-    );
-  }
+    // Second, apply district tab filter
+    let filteredList = [];
+    if (activeTab === 'more') {
+      filteredList = searched;
+    } else {
+      const currentDistrict = currentUser?.districts?.[activeTab];
+      if (!currentDistrict) {
+        filteredList = searched;
+      } else {
+        const lowerDistrict = currentDistrict.toLowerCase();
+        filteredList = searched.filter(tender => 
+          (tender.department && tender.department.toLowerCase().includes(lowerDistrict)) ||
+          (tender.title && tender.title.toLowerCase().includes(lowerDistrict)) ||
+          (tender.tender_notice_number && tender.tender_notice_number.toLowerCase().includes(lowerDistrict))
+        );
+      }
+    }
 
-  displayTenders = [...displayTenders].sort((a, b) => {
-    const aValue = getComparableTenderValue(a, sortConfig.key);
-    const bValue = getComparableTenderValue(b, sortConfig.key);
+    // Third, apply sorting
+    return [...filteredList].sort((a, b) => {
+      const aValue = getComparableTenderValue(a, sortConfig.key);
+      const bValue = getComparableTenderValue(b, sortConfig.key);
 
-    if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
-    if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
-    return 0;
-  });
+      if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [tenders, searchTerm, searchField, activeTab, sortConfig, currentUser]);
 
-  const markedTendersList = tenders.filter(t => notifiedTenders.includes(t.tender_id));
+  // Derived tab title
+  const tabTitle = useMemo(() => {
+    if (activeTab === 'more') return "All State Tenders";
+    const currentDistrict = currentUser?.districts?.[activeTab];
+    return currentDistrict ? `${currentDistrict} Tenders` : "Tenders";
+  }, [activeTab, currentUser]);
+
+  // Memoize marked tenders list
+  const markedTendersList = useMemo(() => {
+    return tenders.filter(t => notifiedTenders.includes(t.tender_id));
+  }, [tenders, notifiedTenders]);
+
+  // Get slice for the current page to display
+  const paginatedTenders = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return displayTenders.slice(startIndex, startIndex + itemsPerPage);
+  }, [displayTenders, currentPage, itemsPerPage]);
 
   const SortableHeader = ({ column }) => {
     const isActive = sortConfig.key === column.key;
@@ -2531,7 +2558,7 @@ export default function App() {
                       </td>
                     </tr>
                   ) : (
-                    displayTenders.map((tender, index) => {
+                    paginatedTenders.map((tender, index) => {
                       const isMarked = notifiedTenders.includes(tender.tender_id);
                       return (
                         <tr key={index} className={`transition-colors ${isMarked ? 'bg-blue-50/50 hover:bg-blue-50' : 'hover:bg-slate-50'}`}>
@@ -2626,6 +2653,104 @@ export default function App() {
                 </tbody>
               </table>
             </div>
+
+            {/* Pagination Controls */}
+            {displayTenders.length > 0 && (
+              <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex flex-col sm:flex-row justify-between items-center gap-4 shrink-0 no-print">
+                <div className="flex items-center gap-4 text-sm text-slate-500 font-medium">
+                  <span className="flex items-center gap-2">
+                    <span>Show</span>
+                    <select
+                      value={itemsPerPage}
+                      onChange={(e) => {
+                        setItemsPerPage(Number(e.target.value));
+                        setCurrentPage(1);
+                      }}
+                      className="px-2 py-1 border border-slate-300 rounded bg-white text-slate-700 outline-none focus:border-blue-500 text-xs font-bold"
+                    >
+                      <option value={10}>10</option>
+                      <option value={20}>20</option>
+                      <option value={50}>50</option>
+                      <option value={100}>100</option>
+                    </select>
+                    <span>entries</span>
+                  </span>
+                  <span>
+                    Showing {Math.min(displayTenders.length, (currentPage - 1) * itemsPerPage + 1)} to{' '}
+                    {Math.min(displayTenders.length, currentPage * itemsPerPage)} of {displayTenders.length} entries
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-1 flex-wrap justify-center">
+                  <button
+                    onClick={() => setCurrentPage(1)}
+                    disabled={currentPage === 1}
+                    className="px-2.5 py-1.5 rounded border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-xs font-bold"
+                  >
+                    First
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                    className="px-2.5 py-1.5 rounded border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-xs font-bold"
+                  >
+                    Previous
+                  </button>
+
+                  {/* Render page numbers intelligently */}
+                  {(() => {
+                    const totalPages = Math.ceil(displayTenders.length / itemsPerPage);
+                    const pages = [];
+                    const maxVisiblePages = 5;
+                    
+                    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+                    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+                    
+                    if (endPage - startPage + 1 < maxVisiblePages) {
+                      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+                    }
+
+                    for (let i = startPage; i <= endPage; i++) {
+                      pages.push(
+                        <button
+                          key={i}
+                          onClick={() => setCurrentPage(i)}
+                          className={`px-3 py-1.5 rounded text-xs font-bold transition-all ${
+                            currentPage === i
+                              ? 'bg-blue-600 text-white shadow-sm'
+                              : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                          }`}
+                        >
+                          {i}
+                        </button>
+                      );
+                    }
+                    return pages;
+                  })()}
+
+                  <button
+                    onClick={() => {
+                      const totalPages = Math.ceil(displayTenders.length / itemsPerPage);
+                      setCurrentPage(prev => Math.min(totalPages, prev + 1));
+                    }}
+                    disabled={currentPage === Math.ceil(displayTenders.length / itemsPerPage)}
+                    className="px-2.5 py-1.5 rounded border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-xs font-bold"
+                  >
+                    Next
+                  </button>
+                  <button
+                    onClick={() => {
+                      const totalPages = Math.ceil(displayTenders.length / itemsPerPage);
+                      setCurrentPage(totalPages);
+                    }}
+                    disabled={currentPage === Math.ceil(displayTenders.length / itemsPerPage)}
+                    className="px-2.5 py-1.5 rounded border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-xs font-bold"
+                  >
+                    Last
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
           
         </main>
