@@ -1324,14 +1324,12 @@ export default function App() {
     setCurrentPage(1);
   }, [activeTab, searchTerm, searchField, itemsPerPage]);
 
-  // 1. Memoize displayTenders to prevent heavy recalculations & sorting on every render
-  const displayTenders = useMemo(() => {
+  // 1. Memoize searchedTenders based ONLY on text search, preventing full-list filtering when only switching tabs
+  const searchedTenders = useMemo(() => {
     const searchValue = searchTerm.toLowerCase().trim();
-    
-    // First, apply text search filter
-    const searched = tenders.filter(tender => {
-      if (!searchValue) return true;
+    if (!searchValue) return tenders;
 
+    return tenders.filter(tender => {
       const searchableFields = {
         all: [
           tender.title,
@@ -1350,18 +1348,20 @@ export default function App() {
       return (searchableFields[searchField] || searchableFields.all)
         .some(value => String(value || '').toLowerCase().includes(searchValue));
     });
+  }, [tenders, searchTerm, searchField]);
 
-    // Second, apply district tab filter
+  // 2. Memoize displayTenders by applying tab filtering and optimized Schwartzian transform sorting
+  const displayTenders = useMemo(() => {
     let filteredList = [];
     if (activeTab === 'more') {
-      filteredList = searched;
+      filteredList = searchedTenders;
     } else {
       const currentDistrict = currentUser?.districts?.[activeTab];
       if (!currentDistrict) {
-        filteredList = searched;
+        filteredList = searchedTenders;
       } else {
         const lowerDistrict = currentDistrict.toLowerCase();
-        filteredList = searched.filter(tender => 
+        filteredList = searchedTenders.filter(tender => 
           (tender.department && tender.department.toLowerCase().includes(lowerDistrict)) ||
           (tender.title && tender.title.toLowerCase().includes(lowerDistrict)) ||
           (tender.tender_notice_number && tender.tender_notice_number.toLowerCase().includes(lowerDistrict))
@@ -1369,16 +1369,24 @@ export default function App() {
       }
     }
 
-    // Third, apply sorting
-    return [...filteredList].sort((a, b) => {
-      const aValue = getComparableTenderValue(a, sortConfig.key);
-      const bValue = getComparableTenderValue(b, sortConfig.key);
+    // Schwartzian transform: Pre-compute sort keys to avoid recalculations inside comparison loops
+    const key = sortConfig.key;
+    const direction = sortConfig.direction;
+    
+    const mapped = filteredList.map((el, i) => ({
+      index: i,
+      sortKey: getComparableTenderValue(el, key),
+      el
+    }));
 
-      if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
-      if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+    mapped.sort((a, b) => {
+      if (a.sortKey < b.sortKey) return direction === 'asc' ? -1 : 1;
+      if (a.sortKey > b.sortKey) return direction === 'asc' ? 1 : -1;
       return 0;
     });
-  }, [tenders, searchTerm, searchField, activeTab, sortConfig, currentUser]);
+
+    return mapped.map(v => v.el);
+  }, [searchedTenders, activeTab, sortConfig, currentUser]);
 
   // Derived tab title
   const tabTitle = useMemo(() => {
