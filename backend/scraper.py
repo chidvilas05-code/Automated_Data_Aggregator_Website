@@ -12,19 +12,343 @@ import requests
 from datetime import datetime
 from urllib.parse import unquote, urljoin, urlparse
 
-from selenium import webdriver
-from selenium.webdriver import ActionChains
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import (
-    UnexpectedAlertPresentException,
-    NoSuchElementException
-)
+from playwright.sync_api import sync_playwright
+import uuid
+
+class By:
+    XPATH = "xpath"
+    TAG_NAME = "tag name"
+    ID = "id"
+    CLASS_NAME = "class name"
+    CSS_SELECTOR = "css selector"
+
+class Keys:
+    ESCAPE = "\ue00c"
+    RETURN = "\ue006"
+    ENTER = "\ue007"
+
+class NoSuchElementException(Exception):
+    pass
+
+class UnexpectedAlertPresentException(Exception):
+    pass
+
+def map_selector(by, value):
+    if by == "xpath" or by == By.XPATH:
+        if not value.startswith("xpath="):
+            return f"xpath={value}"
+        return value
+    elif by == "tag name" or by == By.TAG_NAME:
+        return value
+    elif by == "id" or by == By.ID:
+        return f"#{value}"
+    elif by == "class name" or by == By.CLASS_NAME:
+        return f".{value}"
+    elif by == "css selector" or by == By.CSS_SELECTOR:
+        return value
+    else:
+        return value
+
+class PlaywrightElementWrapper:
+    def __init__(self, element, driver):
+        self.element = element
+        self.driver = driver
+
+    @property
+    def text(self):
+        try:
+            return self.element.inner_text()
+        except:
+            return ""
+
+    @property
+    def tag_name(self):
+        try:
+            return self.element.evaluate("el => el.tagName")
+        except:
+            return ""
+
+    def get_attribute(self, name):
+        try:
+            return self.element.get_attribute(name)
+        except:
+            return None
+
+    def is_displayed(self):
+        try:
+            return self.element.is_visible()
+        except:
+            return False
+
+    def click(self):
+        try:
+            self.element.click(timeout=10000)
+        except Exception as e:
+            try:
+                self.element.evaluate("el => el.click()")
+            except:
+                raise e
+
+    def send_keys(self, *args):
+        for val in args:
+            if val == Keys.ESCAPE:
+                self.element.press("Escape")
+            elif val in (Keys.RETURN, Keys.ENTER):
+                self.element.press("Enter")
+            else:
+                try:
+                    self.element.fill(str(val))
+                except:
+                    try:
+                        self.element.type(str(val))
+                    except:
+                        pass
+
+    def clear(self):
+        try:
+            self.element.fill("")
+        except:
+            pass
+
+    def find_element(self, by, value):
+        selector = map_selector(by, value)
+        el = self.element.query_selector(selector)
+        if not el:
+            raise NoSuchElementException(f"Element not found: {by}={value}")
+        return PlaywrightElementWrapper(el, self.driver)
+
+    def find_elements(self, by, value):
+        selector = map_selector(by, value)
+        elements = self.element.query_selector_all(selector)
+        return [PlaywrightElementWrapper(el, self.driver) for el in elements]
+
+class SwitchTo:
+    def __init__(self, driver):
+        self.driver = driver
+
+    def window(self, handle):
+        page = self.driver._page_handles.get(handle)
+        if page:
+            self.driver.page = page
+            self.driver.current_frame = page
+            try:
+                page.bring_to_front()
+            except:
+                pass
+        else:
+            raise KeyError(f"Window handle {handle} not found")
+
+    def default_content(self):
+        self.driver.current_frame = self.driver.page
+
+    def frame(self, frame_ref):
+        if isinstance(frame_ref, int):
+            child_frames = self.driver.page.main_frame.child_frames
+            if 0 <= frame_ref < len(child_frames):
+                self.driver.current_frame = child_frames[frame_ref]
+            else:
+                raise IndexError(f"Frame index {frame_ref} out of bounds")
+        elif isinstance(frame_ref, str):
+            for f in self.driver.page.frames:
+                if f.name == frame_ref:
+                    self.driver.current_frame = f
+                    return
+            raise ValueError(f"Frame with name {frame_ref} not found")
+        elif isinstance(frame_ref, PlaywrightElementWrapper):
+            content_f = frame_ref.element.content_frame()
+            if content_f:
+                self.driver.current_frame = content_f
+            else:
+                raise ValueError("Element is not a frame/iframe or has no content frame")
+
+    @property
+    def alert(self):
+        class MockAlert:
+            def accept(self):
+                pass
+            def dismiss(self):
+                pass
+        return MockAlert()
+
+class PlaywrightDriverWrapper:
+    def __init__(self, download_dir=None):
+        self.download_dir = download_dir
+        self.playwright = sync_playwright().start()
+        
+        is_linux = os.name != 'nt'
+        default_headless = '1' if is_linux else '0'
+        headless = os.environ.get('HEADLESS', default_headless) == '1'
+        
+        launch_args = ['--no-sandbox', '--disable-dev-shm-usage']
+        self.browser = self.playwright.chromium.launch(
+            headless=headless,
+            args=launch_args
+        )
+        
+        context_args = {}
+        if download_dir:
+            os.makedirs(download_dir, exist_ok=True)
+            context_args["accept_downloads"] = True
+            
+        self.context = self.browser.new_context(**context_args)
+        
+        self._page_handles = {}
+        self._handle_to_page = {}
+        
+        self.page = self.context.new_page()
+        self.current_frame = self.page
+        self._register_page(self.page)
+        
+        self.context.on("page", lambda p: self._register_page(p))
+        
+        def on_download(download):
+            if self.download_dir:
+                dest = os.path.join(self.download_dir, download.suggested_filename)
+                download.save_as(dest)
+                print(f"[DOWNLOAD] Playwright downloaded {download.suggested_filename} to {dest}")
+            else:
+                print(f"[DOWNLOAD] Warning: download event fired but download_dir is not set!")
+                
+        self.context.on("download", on_download)
+        
+        self.switch_to = SwitchTo(self)
+
+    def _register_page(self, page):
+        for h, p in self._page_handles.items():
+            if p == page:
+                return h
+        h = str(uuid.uuid4())
+        self._page_handles[h] = page
+        self._handle_to_page[page] = h
+        
+        def on_close(p):
+            h_to_del = self._handle_to_page.get(p)
+            if h_to_del:
+                if h_to_del in self._page_handles:
+                    del self._page_handles[h_to_del]
+                del self._handle_to_page[p]
+                
+        page.on("close", lambda: on_close(page))
+        page.on("dialog", lambda dialog: dialog.accept())
+        return h
+
+    def get(self, url):
+        try:
+            self.page.goto(url, wait_until="load", timeout=60000)
+        except Exception as e:
+            print(f"[WRAPPER WARNING] Page navigation to {url} failed: {e}")
+
+    @property
+    def current_url(self):
+        return self.page.url
+
+    @property
+    def title(self):
+        return self.page.title()
+
+    @property
+    def page_source(self):
+        return self.page.content()
+
+    def save_screenshot(self, screenshot_path):
+        self.page.screenshot(path=screenshot_path)
+
+    @property
+    def window_handles(self):
+        handles = []
+        for p in self.context.pages:
+            try:
+                h = self._register_page(p)
+                handles.append(h)
+            except:
+                pass
+        return handles
+
+    @property
+    def current_window_handle(self):
+        return self._register_page(self.page)
+
+    def close(self):
+        self.page.close()
+
+    def quit(self):
+        try:
+            self.browser.close()
+        except:
+            pass
+        try:
+            self.playwright.stop()
+        except:
+            pass
+
+    def find_element(self, by, value):
+        selector = map_selector(by, value)
+        el = self.current_frame.query_selector(selector)
+        if not el:
+            raise NoSuchElementException(f"Element not found: {by}={value}")
+        return PlaywrightElementWrapper(el, self)
+
+    def find_elements(self, by, value):
+        selector = map_selector(by, value)
+        elements = self.current_frame.query_selector_all(selector)
+        return [PlaywrightElementWrapper(el, self) for el in elements]
+
+    def execute_script(self, script, *args):
+        unwrapped_args = []
+        for arg in args:
+            if isinstance(arg, PlaywrightElementWrapper):
+                unwrapped_args.append(arg.element)
+            else:
+                unwrapped_args.append(arg)
+        return self.current_frame.evaluate(
+            "([script, args]) => new Function(script).apply(null, args)",
+            [script, unwrapped_args]
+        )
+
+class WebDriverWait:
+    def __init__(self, driver, timeout):
+        self.driver = driver
+        self.timeout = timeout
+
+    def until(self, method):
+        return method(self.driver, self.timeout)
+
+class EC:
+    @staticmethod
+    def presence_of_element_located(locator_tuple):
+        by, value = locator_tuple
+        def callback(driver, timeout):
+            selector = map_selector(by, value)
+            el = driver.current_frame.wait_for_selector(selector, timeout=timeout * 1000)
+            if el:
+                return PlaywrightElementWrapper(el, driver)
+            return None
+        return callback
+
+class ActionChains:
+    def __init__(self, driver):
+        self.driver = driver
+        self.target = None
+
+    def move_to_element(self, element):
+        self.target = element
+        return self
+
+    def pause(self, duration):
+        return self
+
+    def click(self, element=None):
+        if element:
+            self.target = element
+        return self
+
+    def perform(self):
+        if self.target:
+            self.target.element.scroll_into_view_if_needed()
+            self.target.element.click(timeout=10000)
 
 
-DEEP_SCRAPE_WORKERS = int(os.environ.get("DEEP_SCRAPE_WORKERS", "10"))
+DEEP_SCRAPE_WORKERS = int(os.environ.get("DEEP_SCRAPE_WORKERS", "2"))
 MAX_TENDER_RETRIES = int(os.environ.get("MAX_TENDER_RETRIES", "3"))
 RETRY_WAIT_SECONDS = int(os.environ.get("RETRY_WAIT_SECONDS", "30"))
 SCRAPER_INTERVAL_SECONDS = int(os.environ.get("SCRAPER_INTERVAL_SECONDS", "18000"))
@@ -137,44 +461,7 @@ def execute_db_write(conn, cursor, sql, params, worker_label="W1"):
 # =========================================================
 
 def build_driver(download_dir=None):
-    options = webdriver.ChromeOptions()
-
-    options.add_argument('--start-maximized')
-    options.add_argument('--no-sandbox')
-    options.add_argument('--disable-dev-shm-usage')
-
-    if download_dir:
-        os.makedirs(download_dir, exist_ok=True)
-        options.add_experimental_option("prefs", {
-            "download.default_directory": os.path.abspath(download_dir),
-            "download.prompt_for_download": False,
-            "download.directory_upgrade": True,
-            "safebrowsing.enabled": True,
-            "plugins.always_open_pdf_externally": True,
-        })
-
-    # Run headless on Linux/Servers by default, and allow override via env variable
-    is_linux = os.name != 'nt'
-    default_headless = '1' if is_linux else '0'
-    if os.environ.get('HEADLESS', default_headless) == '1':
-        options.add_argument('--headless=new')
-        options.add_argument('--disable-gpu')
-
-    driver = webdriver.Chrome(options=options)
-
-    if download_dir:
-        try:
-            driver.execute_cdp_cmd(
-                "Page.setDownloadBehavior",
-                {
-                    "behavior": "allow",
-                    "downloadPath": os.path.abspath(download_dir),
-                }
-            )
-        except Exception as e:
-            print(f"[DOWNLOAD] Could not configure CDP download behavior: {e}")
-
-    return driver
+    return PlaywrightDriverWrapper(download_dir)
 
 
 # =========================================================
@@ -2564,9 +2851,12 @@ def run_scraper_cycle():
         print("[SYSTEM] Database is empty. Scraping all pages for initial data load...")
         max_pages = None
     else:
-        # Enforce MAX_PAGES (default to 5 pages if not specified)
-        max_pages = MAX_PAGES if MAX_PAGES > 0 else 5
-        print(f"[SYSTEM] Database has {tender_count} records. Scraping first {max_pages} pages for fast update...")
+        # Enforce MAX_PAGES if specified, otherwise scrape all pages
+        max_pages = MAX_PAGES if MAX_PAGES > 0 else None
+        if max_pages:
+            print(f"[SYSTEM] Database has {tender_count} records. Scraping first {max_pages} pages...")
+        else:
+            print(f"[SYSTEM] Database has {tender_count} records. Scraping all pages for full update...")
 
     # phase 1
     scraped = scrape_tenders(max_pages=max_pages)
